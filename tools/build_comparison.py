@@ -18,7 +18,7 @@ import ifcopenshell.api
 import numpy as np
 
 import kg_generator
-from swept_geometrie import lathes_to_ifc
+from swept_geometrie import cleanout_lathes, lathes_to_ifc, reducer_lathes
 from tests.silhouette import tessellate
 from tools.measure_reference import canonical_elbow_frame, load_mesh, mouth_annuli
 
@@ -104,9 +104,12 @@ def _align_by_mouths(vertices, faces, spigot_target):
     d_branch /= np.linalg.norm(d_branch)
 
     y = (socket["center"] - spigot["center"])
-    y /= np.linalg.norm(y)
-    if np.dot(y, axis) < 0:  # osa hrotu míří do tělesa k hnízdu
+    if np.dot(y, axis) < 0:
         y = -y
+    y /= np.linalg.norm(y)
+    # osa hlavního běhu = osa ústí hrotu (spojnice středů hrot→hnízdo bývá
+    # u nesouměrně tessellovaného hnízda mimo osu až o ~15°, např. 222420z)
+    y = axis if np.dot(axis, y) > 0 else -axis
     # branch do +X poloviny
     x = d_branch - np.dot(d_branch, y) * y
     x /= np.linalg.norm(x)
@@ -236,13 +239,151 @@ def build_branches(output_path, articles=BRANCH_ARTICLES):
     return output_path
 
 
+# Velký grid: všechny kusy se STEP referencí. (druh, článek, recept-data)
+from tests.silhouette import register_cached  # noqa: E402
+
+GRID = [
+    ("elbow", "220200z"), ("elbow", "220210z"), ("elbow", "220220z"),
+    ("elbow", "222200z"), ("elbow", "222210z"),
+    ("branch", "220300z"), ("branch", "220400z"),
+    ("branch", "222320z"), ("branch", "222420z"),
+    ("reducer", "222700z"), ("cleanout", "175600z"),
+]
+
+
+def _centered(coords):
+    center = (coords.min(axis=0) + coords.max(axis=0)) / 2
+    return coords - center
+
+
+def _align_two_mouths(vertices, faces):
+    """Kanonizace dvústí (redukce): osa podle čela většího hnízda, malý
+    konec (i s excentricitou) do +X."""
+    mouths = _merge_mouths(mouth_annuli(vertices, faces))
+    if len(mouths) != 2:
+        raise ValueError(f"očekávány 2 ústí, nalezeno {len(mouths)}")
+    wide, narrow = sorted(mouths, key=lambda m: -m["outer_od"])
+    y = wide["axis_in"] if np.dot(wide["axis_in"], narrow["center"] - wide["center"]) > 0 else -wide["axis_in"]
+    line = narrow["center"] - wide["center"]
+    x = line - np.dot(line, y) * y
+    if np.linalg.norm(x) < 1e-6:
+        x = np.array((1.0, 0.0, 0.0)) - y * y[0]
+    x /= np.linalg.norm(x)
+    z = np.cross(x, y)
+    rotation = np.column_stack((x, y, z))
+    return (vertices - wide["center"]) @ rotation
+
+
+def _align_cleanout(vertices, faces):
+    """Kanonizace čistícího kusu: hlavní osa podle dvou vzdálených čel,
+    boční hrdlo do +X."""
+    mouths = _merge_mouths(mouth_annuli(vertices, faces))
+    if len(mouths) < 2:
+        raise ValueError("málo ústí")
+    import itertools
+    a, b = max(itertools.combinations(mouths, 2), key=lambda p: np.linalg.norm(p[0]["center"] - p[1]["center"]))
+    wide = a if a["outer_od"] > b["outer_od"] else b
+    narrow = b if wide is a else a
+    y = wide["axis_in"] if np.dot(wide["axis_in"], narrow["center"] - wide["center"]) > 0 else -wide["axis_in"]
+    stubs = [m for m in mouths if m is not wide and m is not narrow]
+    if stubs:
+        delta = stubs[0]["center"] - wide["center"]
+        x = delta - np.dot(delta, y) * y
+    else:
+        x = np.array((1.0, 0.0, 0.0)) - y * y[0]
+    if np.linalg.norm(x) < 1e-6:
+        x = np.array((0.0, 0.0, 1.0)) - y * y[2]
+    x /= np.linalg.norm(x)
+    z = np.cross(x, y)
+    return (vertices - wide["center"]) @ np.column_stack((x, y, z))
+
+
+def _grid_items(file, kind, article):
+    """(STEP items, SWEPT items, representation_type) — oba bbox-centrované."""
+    table = kg_generator.load_table()
+    if kind == "elbow":
+        row = next(r for r in table["elbows"] if r["article"] == article[:-1])
+        vertices, faces = load_mesh(ROOT / f"data/ostendorf/{article}.json")
+        mouths = mouth_annuli(vertices, faces)
+        socket = max(mouths, key=lambda m: m["outer_od"] - m["inner_id"])
+        spigot = min(mouths, key=lambda m: m["outer_od"] - m["inner_id"])
+        canon, _, _, _ = canonical_elbow_frame(
+            vertices, mouths=[socket, spigot],
+            origin_mouth=row.get("reference_origin", "socket"),
+        )
+        ref = _centered(np.asarray(canon, float))
+        ref_faces = faces
+        body, _ = kg_generator.kg_elbow_lathes(row, table)
+    elif kind == "branch":
+        vertices, faces = load_mesh(ROOT / f"data/ostendorf/{article}.json")
+        _, _, _, length = _branch_model_body(article)
+        coords = _align_by_mouths(vertices, faces, (0.0, -length / 2, 0.0))
+        ref = _centered(_apply_manual(coords, article))
+        ref_faces = faces
+        body, _, _, _ = _branch_model_body(article)
+    else:
+        body = _grid_body(kind, article)
+        model = tessellate(body)
+        rv, rf = load_mesh(ROOT / f"data/ostendorf/{article}.json")
+        if kind == "reducer":
+            ref = _centered(_align_two_mouths(rv, rf))
+        elif kind == "cleanout":
+            ref = _centered(_align_cleanout(rv, rf))
+        else:
+            rotation = register_cached(model, (rv, rf), article)
+            ref = _centered(rv @ rotation)
+        ref_faces = rf
+    swept_mesh = tessellate(body)
+    swept = _centered(swept_mesh[0])
+    items_ref = [file.create_entity(
+        "IfcTriangulatedFaceSet",
+        Coordinates=file.create_entity(
+            "IfcCartesianPointList3D", CoordList=np.round(ref, 4).tolist()),
+        CoordIndex=(np.asarray(ref_faces) + 1).tolist(), Closed=False)]
+    items_swept = [file.create_entity(
+        "IfcTriangulatedFaceSet",
+        Coordinates=file.create_entity(
+            "IfcCartesianPointList3D", CoordList=np.round(swept, 4).tolist()),
+        CoordIndex=(np.asarray(swept_mesh[1]) + 1).tolist(), Closed=False)]
+    return items_ref, items_swept, "Tessellation"
+
+
+def _grid_body(kind, article):
+    if kind == "reducer":
+        return reducer_lathes(
+            176.5, 160, 110, 4.0, 3.2, 182, 127, 84, 66, offset_mm=23.1)[0]
+    if kind == "cleanout":
+        return cleanout_lathes(238.5, 110, 3.2, 127, 66, 143.0, 71.5)[0]
+    raise ValueError(kind)
+
+
+def build_grid(output_path, entries=GRID, per_row=4):
+    file, context = _new_file("STEP vs SweptSolid grid")
+    col_x, row_y = 700.0, 600.0
+    for index, (kind, article) in enumerate(entries):
+        col, row = index % per_row, index // per_row
+        base = (col * col_x, -row * row_y, 0.0)
+        items_ref, items_swept, rep = _grid_items(file, kind, article)
+        _place(file, context, "STEP " + article, "BEND", base, items_ref, rep)
+        _place(file, context, "SWEPT " + article, "BEND",
+               (base[0] + 350.0, base[1], 0.0), items_swept, rep)
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    file.write(str(output_path))
+    return output_path
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default=str(ROOT / "out/compare-kgb.ifc"))
     parser.add_argument("--branches", nargs="*", default=None,
                         help="články odboček; bez hodnoty použije výchozí seznam")
+    parser.add_argument("--grid", nargs="*", default=None,
+                        help="velký grid všech kusů; bez hodnoty použije výchozí seznam")
     args = parser.parse_args()
-    if args.branches is not None:
+    if args.grid is not None:
+        print("Vytvořeno:", build_grid(args.output, args.grid or GRID))
+    elif args.branches is not None:
         print("Vytvořeno:", build_branches(args.output, args.branches or BRANCH_ARTICLES))
     else:
         print("Vytvořeno:", build_elbows(args.output))
