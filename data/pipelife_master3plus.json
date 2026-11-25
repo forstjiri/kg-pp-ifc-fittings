@@ -1,0 +1,119 @@
+{
+  "material": "PP",
+  "standard": "EN 1451-1",
+  "source_series": "MASTER 3 PLUS",
+  "current_source": {
+    "title": "Technisches Handbuch MASTER 3 PLUS",
+    "url": "https://www.pipelife.at/content/dam/pipelife/austria/marketing/building/soil-waste/documents/Technisches%20Handbuch%20MASTER%203%20PLUS.pdf",
+    "edition_evidence": "PDF metadata modified 2026-04-13; section 4.1, pages 29-33",
+    "dimension_units": "mm"
+  },
+  "legacy_source": {
+    "title": "MASTER 3 PLUS brochure EN ATI",
+    "url": "https://www.pipelife.cz/content/dam/pipelife/czech-republic/ke-stazen%C3%AD/english/PIPELIFE_MASTER_3_PLUS_BROCHURE_EN_ATI.pdf",
+    "edition_evidence": "PDF metadata created 2021-02-23; legacy article numbers 349610xxxx from the earlier Czech catalogue extract",
+    "dimension_units": "mm"
+  },
+  "dimension_status": {
+    "catalogue_values": "transcribed from the current Austrian technical handbook unless marked legacy",
+    "approximation": "The handbook gives catalogue envelope dimensions, not a complete socket cross-section. Parametric socket wall, seal groove and bend centreline radii are approximations until dimensioned technical drawings are measured.",
+    "socket": {
+      "insertion_depth_t_mm": {
+        "32": 45,
+        "40": 52,
+        "50": 52,
+        "75": 56,
+        "90": 58,
+        "110": 62,
+        "125": 68,
+        "160": 77
+      },
+      "depth_status": "catalogue t values from current handbook section 4.1; mapping t to fitting socket depth is approximate",
+      "bore_diameter_rule": "nominal OD plus radial assembly clearance; approximate",
+      "collar_outer_diameter_mm": {
+        "32": 41.6,
+        "40": 53.3,
+        "50": 63.3,
+        "75": 89.1,
+        "110": 127.0,
+        "125": 144.9,
+        "160": 183.4
+      },
+      "seal_lip_and_groove": "approximate; no dimensioned seal cross-section extracted"
+    }
+  },
+  "elbows": [
+    {"angle_deg":15,"dn_od":32,"od_mm":33.0,"socket_od_mm":41.6,"l1_mm":30,"l2_mm":44.9,"length_mm":46,"z1_mm":9,"z2_mm":9,"article":"M3-B30/15","status":"current catalogue"},
+    {"angle_deg":15,"dn_od":40,"od_mm":41.1,"socket_od_mm":53.3,"l1_mm":46.5,"l2_mm":50.6,"length_mm":59,"z1_mm":5.5,"z2_mm":9,"article":"M3-B40/15","status":"current catalogue"},
+    {"angle_deg":15,"dn_od":50,"od_mm":51.0,"socket_od_mm":63.3,"l1_mm":47,"l2_mm":51.2,"length_mm":60,"z1_mm":6,"z2_mm":10,"article":"M3-B50/15","status":"current catalogue"},
+    {"angle_deg":15,"dn_od":75,"od_mm":76.1,"socket_od_mm":89.1,"l1_mm":53,"l2_mm":54.8,"length_mm":68,"z1_mm":8,"z2_mm":12,"article":"M3-B70/15","status":"current catalogue"},
+    {"angle_deg":15,"dn_od":110,"od_mm":111.3,"socket_od_mm":127.0,"l1_mm":59,"l2_mm":60.6,"length_mm":76,"z1_mm":10,"z2_mm":15,"article":"M3-B100/15","status":"current catalogue"},
+    {"angle_deg":15,"dn_od":125,"od_mm":126.3,"socket_od_mm":144.9,"l1_mm":65,"l2_mm":66.5,"length_mm":88,"z1_mm":16,"z2_mm":22,"article":"M3-B125/15","status":"current catalogue"},
+    {"angle_deg":15,"dn_od":160,"od_mm":161.5,"socket_od_mm":183.4,"l1_mm":74,"l2_mm":75.5,"length_mm":95,"z1_mm":14,"z2_mm":21,"article":"M3-B150/15","status":"current catalogue"},
+    {"angle_deg":30,"dn_od":32,"od_mm":33.0,"socket_od_mm":41.6,"l1_mm":30,"l2_mm":44.9,"length_mm":47,"z1_mm":10,"z2_mm":10,"article":"M3-B30/30","status":"current catalogue"},
+    {"angle_deg":30,"dn_od":40,"od_mm":41.1,"socket_od_mm":53.3,"l1_mm":46.5,"l2_mm":50.6,"length_mm":62,"z1_mm":8.5,"z2_mm":12,"article":"M3-B40/30","status":"current catalogue"},
+    {"angle_deg":30,"dn_od":50,"od_mm":51.0,"socket_od_mm":63.3,"l1_mm":47,"l2_mm":51.2,"length_mm":64,"z1_mm":10,"z2_mm":13,"article":"M3-B50/30","status":"current catalogue"},
+    {"angle_deg":30,"dn_od":75,"od_mm":76.1,"socket_od_mm":89.1,"l1_mm":53,"l2_mm":54.8,"length_mm":74,"z1_mm":14,"z2_mm":18,"article":"M3-B70/30","status":"current catalogue"},
+    {"angle_deg":30,"dn_od":110,"od_mm":111.3,"socket_od_mm":127.0,"l1_mm":59,"l2_mm":60.6,"length_mm":84,"z1_mm":18,"z2_mm":23,"article":"M3-B100/30","status":"current catalogue"},
+    {"angle_deg":30,"dn_od":125,"od_mm":126.3,"socket_od_mm":144.9,"l1_mm":65,"l2_mm":66.5,"length_mm":96,"z1_mm":24,"z2_mm":30,"article":"M3-B125/30","status":"current catalogue"},
+    {"angle_deg":30,"dn_od":160,"od_mm":161.5,"socket_od_mm":183.4,"l1_mm":74,"l2_mm":75.5,"length_mm":106,"z1_mm":25,"z2_mm":32,"article":"M3-B150/30","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":32,"od_mm":33.0,"socket_od_mm":41.6,"l1_mm":30,"l2_mm":44.9,"length_mm":48,"z1_mm":11,"z2_mm":14,"article":"M3-B30/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":40,"od_mm":41.1,"socket_od_mm":53.3,"l1_mm":46.5,"l2_mm":50.6,"length_mm":65,"z1_mm":11.5,"z2_mm":15,"article":"M3-B40/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":50,"od_mm":51.0,"socket_od_mm":63.3,"l1_mm":47,"l2_mm":51.2,"length_mm":67,"z1_mm":13,"z2_mm":17,"article":"M3-B50/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":75,"od_mm":76.1,"socket_od_mm":89.1,"l1_mm":53,"l2_mm":54.8,"length_mm":79,"z1_mm":19,"z2_mm":23,"article":"M3-B70/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":110,"od_mm":111.3,"socket_od_mm":127.0,"l1_mm":59,"l2_mm":60.6,"length_mm":92,"z1_mm":26,"z2_mm":31,"article":"M3-B100/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":125,"od_mm":126.3,"socket_od_mm":144.9,"l1_mm":65,"l2_mm":66.5,"length_mm":105,"z1_mm":33,"z2_mm":39,"article":"M3-B125/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":160,"od_mm":161.5,"socket_od_mm":183.4,"l1_mm":69,"l2_mm":75.5,"length_mm":114,"z1_mm":38,"z2_mm":45,"article":"M3-B150/45","status":"current catalogue"},
+    {"angle_deg":67.5,"dn_od":50,"od_mm":51.0,"socket_od_mm":63.3,"l1_mm":47,"l2_mm":51.2,"length_mm":74,"z1_mm":20,"z2_mm":24,"article":"M3-B50/67","status":"current catalogue"},
+    {"angle_deg":67.5,"dn_od":75,"od_mm":76.1,"socket_od_mm":89.1,"l1_mm":53,"l2_mm":54.8,"length_mm":89,"z1_mm":29,"z2_mm":33,"article":"M3-B70/67","status":"current catalogue"},
+    {"angle_deg":67.5,"dn_od":110,"od_mm":111.3,"socket_od_mm":127.0,"l1_mm":59,"l2_mm":60.6,"length_mm":106,"z1_mm":40,"z2_mm":45,"article":"M3-B100/67","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":32,"od_mm":33.0,"socket_od_mm":41.6,"l1_mm":30,"l2_mm":44.9,"length_mm":62,"z1_mm":25,"z2_mm":24,"article":"M3-B30/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":40,"od_mm":41.1,"socket_od_mm":53.3,"l1_mm":46,"l2_mm":50.6,"length_mm":76,"z1_mm":23,"z2_mm":26,"article":"M3-B40/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":50,"od_mm":51.0,"socket_od_mm":63.3,"l1_mm":47,"l2_mm":51.2,"length_mm":81,"z1_mm":27,"z2_mm":30,"article":"M3-B50/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":75,"od_mm":76.1,"socket_od_mm":89.1,"l1_mm":53,"l2_mm":54.8,"length_mm":101,"z1_mm":41,"z2_mm":45,"article":"M3-B70/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":110,"od_mm":111.3,"socket_od_mm":127.0,"l1_mm":59,"l2_mm":60.6,"length_mm":124,"z1_mm":58,"z2_mm":63,"article":"M3-B100/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":125,"od_mm":126.3,"socket_od_mm":144.9,"l1_mm":65,"l2_mm":66.5,"length_mm":138,"z1_mm":66,"z2_mm":72,"article":"M3-B125/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":160,"od_mm":161.5,"socket_od_mm":183.4,"l1_mm":74,"l2_mm":75.5,"length_mm":162,"z1_mm":81,"z2_mm":88,"article":"M3-B150/87","status":"current catalogue"}
+  ],
+  "simple_branches": [
+    {"angle_deg":45,"dn_od":110,"branch_dn_od":50,"length_mm":142,"z1_mm":-16,"z2_mm":92,"z3_mm":103,"article":"M3-EA100/50/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":110,"branch_dn_od":75,"length_mm":175,"z1_mm":1,"z2_mm":108,"z3_mm":118,"article":"M3-EA100/70/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":110,"branch_dn_od":90,"length_mm":197,"z1_mm":12,"z2_mm":119,"z3_mm":123,"article":"M3-EA100/90/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":110,"branch_dn_od":110,"length_mm":225,"z1_mm":26,"z2_mm":133,"z3_mm":133,"article":"M3-EA100/100/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":125,"branch_dn_od":110,"length_mm":233,"z1_mm":20,"z2_mm":142,"z3_mm":144,"article":"M3-EA125/100/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":125,"branch_dn_od":125,"length_mm":254,"z1_mm":31,"z2_mm":152,"z3_mm":152,"article":"M3-EA125/125/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":160,"branch_dn_od":110,"length_mm":240,"z1_mm":1,"z2_mm":158,"z3_mm":168,"article":"M3-EA150/100/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":160,"branch_dn_od":125,"length_mm":263,"z1_mm":13,"z2_mm":169,"z3_mm":177,"article":"M3-EA150/125/45","status":"current catalogue"},
+    {"angle_deg":45,"dn_od":160,"branch_dn_od":160,"length_mm":310,"z1_mm":37,"z2_mm":192,"z3_mm":192,"article":"M3-EA150/150/45","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":110,"branch_dn_od":50,"length_mm":128,"z1_mm":27,"z2_mm":35,"z3_mm":60,"article":"M3-EA100/50/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":110,"branch_dn_od":75,"length_mm":151,"z1_mm":39,"z2_mm":46,"z3_mm":62,"article":"M3-EA100/70/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":110,"branch_dn_od":90,"length_mm":207,"z1_mm":81,"z2_mm":60,"z3_mm":79,"article":"M3-EA100/90/87","status":"current catalogue; swept branch"},
+    {"angle_deg":87.5,"dn_od":110,"branch_dn_od":110,"length_mm":207,"z1_mm":81,"z2_mm":60,"z3_mm":79,"article":"M3-EA100/100/87","status":"current catalogue; swept branch"},
+    {"angle_deg":87.5,"dn_od":125,"branch_dn_od":110,"length_mm":194,"z1_mm":57,"z2_mm":66,"z3_mm":62,"article":"M3-EA125/100/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":125,"branch_dn_od":125,"length_mm":225,"z1_mm":73,"z2_mm":80,"z3_mm":80,"article":"M3-EA125/125/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":160,"branch_dn_od":110,"length_mm":203,"z1_mm":55,"z2_mm":67,"z3_mm":90,"article":"M3-EA150/100/87","status":"current catalogue"},
+    {"angle_deg":87.5,"dn_od":160,"branch_dn_od":160,"length_mm":253,"z1_mm":80,"z2_mm":92,"z3_mm":92,"article":"M3-EA150/150/87","status":"current catalogue"}
+  ],
+  "reducers": [
+    {"large_dn_od":40,"small_dn_od":32,"length_mm":66,"z1_mm":12,"large_socket_od_mm":53.3,"small_socket_od_mm":41.6,"article":"M3-R40/30","status":"current catalogue"},
+    {"large_dn_od":50,"small_dn_od":32,"length_mm":72,"z1_mm":18,"large_socket_od_mm":63.3,"small_socket_od_mm":41.6,"article":"M3-R50/30","status":"current catalogue"},
+    {"large_dn_od":50,"small_dn_od":40,"length_mm":66,"z1_mm":12,"large_socket_od_mm":63.3,"small_socket_od_mm":53.3,"article":"M3-R50/40","status":"current catalogue"},
+    {"large_dn_od":75,"small_dn_od":50,"length_mm":81,"z1_mm":20,"large_socket_od_mm":89.1,"small_socket_od_mm":63.3,"article":"M3-R70/50","status":"current catalogue"},
+    {"large_dn_od":110,"small_dn_od":50,"length_mm":109,"z1_mm":43,"large_socket_od_mm":127.0,"small_socket_od_mm":63.3,"article":"M3-R100/50","status":"current catalogue"},
+    {"large_dn_od":110,"small_dn_od":75,"length_mm":93,"z1_mm":27,"large_socket_od_mm":127.0,"small_socket_od_mm":89.1,"article":"M3-R100/70","status":"current catalogue"},
+    {"large_dn_od":125,"small_dn_od":110,"length_mm":89,"z1_mm":18,"large_socket_od_mm":144.9,"small_socket_od_mm":127.0,"article":"M3-R125/100","status":"current catalogue"},
+    {"large_dn_od":160,"small_dn_od":110,"length_mm":120,"z1_mm":39,"large_socket_od_mm":183.4,"small_socket_od_mm":127.0,"article":"M3-R150/100","status":"current catalogue"},
+    {"large_dn_od":160,"small_dn_od":125,"length_mm":111,"z1_mm":30,"large_socket_od_mm":183.4,"small_socket_od_mm":144.9,"article":"M3-R150/125","status":"current catalogue"}
+  ],
+  "cleanouts": [
+    {"dn_od":50,"od_mm":51.0,"socket_od_mm":63.3,"length_mm":76,"l1_mm":47,"l2_mm":130,"z1_mm":36,"service_diameter_mm":51.0,"service_projection_mm":31.65,"service_dimensions_status":"approximate: OD for cover, Dmax/2 projection","article":"M3-RE50","status":"current catalogue"},
+    {"dn_od":75,"od_mm":76.1,"socket_od_mm":89.1,"length_mm":82,"l1_mm":53,"l2_mm":142,"z1_mm":40,"service_diameter_mm":76.1,"service_projection_mm":44.55,"service_dimensions_status":"approximate: OD for cover, Dmax/2 projection","article":"M3-RE70","status":"current catalogue"},
+    {"dn_od":110,"od_mm":111.3,"socket_od_mm":127.0,"length_mm":128,"l1_mm":59,"l2_mm":194,"z1_mm":62,"service_diameter_mm":111.3,"service_projection_mm":63.5,"service_dimensions_status":"approximate: OD for cover, Dmax/2 projection","article":"M3-RE100","status":"current catalogue"},
+    {"dn_od":125,"od_mm":126.3,"socket_od_mm":144.9,"length_mm":154,"l1_mm":65,"l2_mm":225,"z1_mm":74,"service_diameter_mm":126.3,"service_projection_mm":72.45,"service_dimensions_status":"approximate: OD for cover, Dmax/2 projection","article":"M3-RE125","status":"current catalogue"},
+    {"dn_od":160,"od_mm":161.5,"socket_od_mm":183.4,"length_mm":172,"l1_mm":74,"l2_mm":253,"z1_mm":80,"service_diameter_mm":161.5,"service_projection_mm":91.7,"service_dimensions_status":"approximate: OD for cover, Dmax/2 projection","article":"M3-RE150","status":"current catalogue"}
+  ],
+  "legacy_article_examples": {
+    "3496103039": {"family":"elbow","angle_deg":15,"dn_od":110,"z1_mm":10,"z2_mm":15,"source_series":"legacy 2021 Czech catalogue"},
+    "3496102512": {"family":"branch","angle_deg":87.5,"dn_od":110,"branch_dn_od":50,"z1_mm":-16,"z2_mm":92,"z3_mm":103,"source_series":"legacy 2021 Czech catalogue"}
+  }
+}
