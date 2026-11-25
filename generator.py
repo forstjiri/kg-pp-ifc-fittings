@@ -1,6 +1,5 @@
 """Zápis a validace katalogových IFC knihoven tvarovek (obě normy)."""
 
-import json
 from pathlib import Path
 
 import ifcopenshell
@@ -11,7 +10,6 @@ import ifcopenshell.util.element
 import ifcopenshell.util.placement
 import numpy as np
 
-from geometrie import transform_catalogue_mesh, transform_catalogue_points
 from swept_geometrie import SweptBody, lathes_to_ifc, swept_bounds
 
 
@@ -37,27 +35,6 @@ def _add_properties(file, target, name, values):
     )
     target.HasPropertySets = tuple(target.HasPropertySets or ()) + (pset,)
     return pset
-
-
-def validate_source_ports(vertices_mm, definition):
-    """Check each declared port plane intersects the source mesh at OD scale."""
-    vertices = np.asarray(vertices_mm, dtype=float)
-    sections = []
-    for port in definition.ports:
-        center = np.asarray(port.position_mm)
-        axis = np.asarray(port.axis, dtype=float)
-        axis /= np.linalg.norm(axis)
-        delta = vertices - center
-        axial = delta @ axis
-        near_plane = np.abs(axial) <= 0.1
-        radii = np.linalg.norm(delta[near_plane] - np.outer(axial[near_plane], axis), axis=1)
-        if len(radii) < 20:
-            raise RuntimeError(f"portová rovina neprotíná zdrojový mesh: {port.name}")
-        expected_radius = port.od_mm / 2
-        if not expected_radius - 4 <= np.median(radii) <= expected_radius + 2:
-            raise RuntimeError(f"zdrojový mesh nepotvrzuje průměr portu: {port.name}")
-        sections.append((len(radii), float(radii.min()), float(radii.max())))
-    return sections
 
 
 def validate_library(path, records):
@@ -92,40 +69,23 @@ def validate_library(path, records):
         definition = record["definition"]
         if fitting_type.Name != definition.name:
             raise RuntimeError(f"typ v IFC neodpovídá: {definition.name}")
-        mapped_mesh = fitting_type.RepresentationMaps[0].MappedRepresentation.Items[0]
         swept = record["swept"]
-        if swept:
-            items = fitting_type.RepresentationMaps[0].MappedRepresentation.Items
-            if len(items) != len(swept.lathes) or not all(
-                item.is_a("IfcRevolvedAreaSolid") for item in items
-            ):
-                raise RuntimeError(f"IFC neobsahuje tažená tělesa: {definition.article}")
-        elif not np.allclose(
-            np.asarray(mapped_mesh.Coordinates.CoordList),
-            np.round(record["vertices_mm"], 7),
-            atol=1e-9,
+        items = fitting_type.RepresentationMaps[0].MappedRepresentation.Items
+        if len(items) != len(swept.lathes) or not all(
+            item.is_a("IfcRevolvedAreaSolid") for item in items
         ):
-            raise RuntimeError(f"IFC neobsahuje zdrojové vrcholy: {definition.article}")
-        if not swept and not np.array_equal(
-            np.asarray(mapped_mesh.CoordIndex), record["faces"] + 1
-        ):
-            raise RuntimeError(f"IFC neobsahuje zdrojovou topologii: {definition.article}")
+            raise RuntimeError(f"IFC neobsahuje tažená tělesa: {definition.article}")
 
         shape = ifcopenshell.geom.create_shape(settings, occurrence)
         actual_vertices = np.asarray(shape.geometry.verts).reshape(-1, 3)
         actual_faces = len(shape.geometry.faces) // 3
         expected_vertices = record["vertices_mm"] + (index * 1000, 0, 0)
-        # OCCT may weld coincident/near-coincident stations in procedural meshes.
-        if record["has_source_mesh"] and len(actual_vertices) < 0.99 * len(expected_vertices):
-            raise RuntimeError(f"geometry kernel ztratil vrcholy: {definition.article}")
-        if record["has_source_mesh"] and actual_faces < 0.99 * len(record["faces"]):
-            raise RuntimeError(f"geometry kernel ztratil trojúhelníky: {definition.article}")
         if not len(actual_vertices) or not actual_faces:
             raise RuntimeError(f"geometry kernel nevytvořil tvar: {definition.article}")
         if not np.allclose(
             np.r_[actual_vertices.min(axis=0), actual_vertices.max(axis=0)],
             np.r_[expected_vertices.min(axis=0), expected_vertices.max(axis=0)],
-            atol=0.5 if swept else 5e-7,
+            atol=0.5,
         ):
             raise RuntimeError(f"IFC obálka se liší od zdroje: {definition.article}")
 
@@ -150,71 +110,19 @@ def validate_library(path, records):
         record["shape_counts"] = (len(actual_vertices), actual_faces, len(ports))
 
 
-def _prepare_record(definition, mesh_path):
-    if isinstance(mesh_path, SweptBody):
-        low, high = swept_bounds(mesh_path)
-        port_axes = np.asarray([p.axis for p in definition.ports], dtype=float)
-        port_axes /= np.linalg.norm(port_axes, axis=1, keepdims=True)
-        return {
-            "definition": definition,
-            "vertices_mm": np.vstack((low, high)),
-            "faces": np.zeros((0, 3), dtype=int),
-            "has_source_mesh": False,
-            "swept": mesh_path,
-            "port_positions": np.asarray([p.position_mm for p in definition.ports], dtype=float),
-            "port_axes": port_axes,
-            "source_sections": [("parametric swept solid", 0, 0)] * len(definition.ports),
-        }
-    record = _prepare_mesh_record(definition, mesh_path)
-    record["swept"] = None
-    return record
-
-
-def _prepare_mesh_record(definition, mesh_path):
-    if isinstance(mesh_path, tuple):
-        vertices_mm, faces = mesh_path
-        has_source_mesh = False
-        vertices_mm, faces = np.asarray(vertices_mm, dtype=float), np.asarray(faces, dtype=int)
-        port_positions = np.asarray([p.position_mm for p in definition.ports], dtype=float)
-        port_axes = np.asarray([p.axis for p in definition.ports], dtype=float)
-        port_axes /= np.linalg.norm(port_axes, axis=1, keepdims=True)
-    else:
-        vertices_mm, faces = json.loads(Path(mesh_path).read_text())
-        source_vertices_mm = vertices_mm
-        has_source_mesh = True
-        vertices_si, faces = transform_catalogue_mesh(
-            vertices_mm,
-            faces,
-            anchor_mm=definition.mesh_anchor_mm,
-            along=definition.mesh_along,
-            side=definition.mesh_side,
-        )
-        vertices_mm = vertices_si * 1000
-        port_positions = transform_catalogue_points(
-            [p.position_mm for p in definition.ports],
-            anchor_mm=definition.mesh_anchor_mm,
-            along=definition.mesh_along,
-            side=definition.mesh_side,
-        ) * 1000
-        port_axes = transform_catalogue_points(
-            [p.axis for p in definition.ports],
-            anchor_mm=(0, 0, 0),
-            along=definition.mesh_along,
-            side=definition.mesh_side,
-        )
-        port_axes /= np.linalg.norm(port_axes, axis=1, keepdims=True)
+def _prepare_record(definition, body):
+    if not isinstance(body, SweptBody):
+        raise TypeError("knihovna přijímá jen SweptSolid (SweptBody)")
+    low, high = swept_bounds(body)
+    port_axes = np.asarray([p.axis for p in definition.ports], dtype=float)
+    port_axes /= np.linalg.norm(port_axes, axis=1, keepdims=True)
     return {
         "definition": definition,
-        "vertices_mm": vertices_mm,
-        "faces": faces,
-        "has_source_mesh": has_source_mesh,
-        "port_positions": port_positions,
+        "vertices_mm": np.vstack((low, high)),
+        "swept": body,
+        "port_positions": np.asarray([p.position_mm for p in definition.ports], dtype=float),
         "port_axes": port_axes,
-        "source_sections": (
-            validate_source_ports(source_vertices_mm, definition)
-            if has_source_mesh
-            else [("approximate geometry", 0, 0)] * len(definition.ports)
-        ),
+        "source_sections": [("parametric swept solid", 0, 0)] * len(definition.ports),
     }
 
 
@@ -254,32 +162,13 @@ def generate_catalogue_library(items, output_path, name="PVC-U KG"):
     material = file.create_entity("IfcMaterial", Name=name)
     for record in records:
         definition = record["definition"]
-        if record["swept"]:
-            representation = file.create_entity(
-                "IfcShapeRepresentation",
-                ContextOfItems=context,
-                RepresentationIdentifier="Body",
-                RepresentationType="SweptSolid",
-                Items=lathes_to_ifc(file, record["swept"]),
-            )
-        else:
-            representation = file.create_entity(
-                "IfcShapeRepresentation",
-                ContextOfItems=context,
-                RepresentationIdentifier="Body",
-                RepresentationType="Tessellation",
-                Items=[
-                    file.create_entity(
-                        "IfcTriangulatedFaceSet",
-                        Coordinates=file.create_entity(
-                            "IfcCartesianPointList3D",
-                            CoordList=np.round(record["vertices_mm"], 7).tolist(),
-                        ),
-                        CoordIndex=(record["faces"] + 1).tolist(),
-                        Closed=False,
-                    )
-                ],
-            )
+        representation = file.create_entity(
+            "IfcShapeRepresentation",
+            ContextOfItems=context,
+            RepresentationIdentifier="Body",
+            RepresentationType="SweptSolid",
+            Items=lathes_to_ifc(file, record["swept"]),
+        )
         representation_map = file.create_entity(
             "IfcRepresentationMap",
             MappingOrigin=file.create_entity(
