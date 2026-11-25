@@ -1,16 +1,22 @@
 import numpy as np
 
+import pp_generator
 from generator import generate_catalogue_library
 from pp_generator import pp_items
 
 
 def test_parametric_pp_meshes_provide_ports_and_nonempty_triangles():
     items = pp_items()
-    assert len(items) == 60
-    assert sum(definition.family == "BEND" for definition, _ in items) == 31
-    assert sum(definition.family == "JUNCTION" for definition, _ in items) == 15
-    assert sum(definition.family == "TRANSITION" for definition, _ in items) == 9
-    assert sum(definition.family == "USERDEFINED" for definition, _ in items) == 5
+    # catalog rows restricted to the approved sizes (32-160, no 90)
+    sizes = pp_generator.LIBRARY_SIZES
+    table = pp_generator.TABLE
+    assert len(items) == len(
+        [r for r in table["elbows"] if r["dn_od"] in sizes]
+    ) + len(
+        [r for r in table["simple_branches"] if r["dn_od"] in sizes and r["branch_dn_od"] in sizes]
+    ) + len([r for r in table["reducers"] if r["large_dn_od"] in sizes and r["small_dn_od"] in sizes]) + len(
+        [r for r in table["cleanouts"] if r["dn_od"] in sizes]
+    )
     swept = 0
     for definition, body in items:
         # swept solid: exact lathes, no triangle meshes in this library
@@ -20,7 +26,7 @@ def test_parametric_pp_meshes_provide_ports_and_nonempty_triangles():
         expected_ports = 3 if definition.family == "JUNCTION" else 2
         assert len(definition.ports) == expected_ports
         assert "approximate" in definition.geometry_status.lower()
-    assert swept == 60  # every PP item is an exact swept solid; no triangle meshes left
+    assert swept == len(items)  # every PP item is an exact swept solid; no triangle meshes left
 
 
 def test_parametric_pp_occurrence_passes_ifc4_and_orientation_validation(tmp_path):

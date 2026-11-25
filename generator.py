@@ -329,6 +329,9 @@ def generate_catalogue_library(items, output_path, name="PVC-U KG"):
                     "Axis": ", ".join(f"{v:.6f}" for v in axis),
                     "FlowDirection": port.flow,
                     "OuterDiameter": port.od_mm,
+                    "EndType": port.end_type,
+                    "InsertionDepth": "" if port.insertion_mm is None else port.insertion_mm,
+                    "TakeOut": "" if port.take_out_mm is None else port.take_out_mm,
                 },
             )
 

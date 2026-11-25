@@ -1,0 +1,613 @@
+{
+ "material": "PVC-U",
+ "standard": "EN 1401-1",
+ "manufacturer": "Ostendorf",
+ "source": "KG 2019 katalog (PDF)",
+ "series": "current",
+ "sockets": {
+  "110": {
+   "insertion_depth_t_mm": 66,
+   "collar_diameter_mm": 127,
+   "wall_mm": 3.2,
+   "status": "catalogue",
+   "source": "katalog str. 33",
+   "socket_zone_mm": 64,
+   "socket_zone_status": "catalogue (katalog str. 33 / výkres DN160)"
+  },
+  "125": {
+   "insertion_depth_t_mm": 68,
+   "collar_diameter_mm": 144,
+   "wall_mm": 3.2,
+   "status": "catalogue",
+   "source": "katalog str. 33"
+  },
+  "160": {
+   "insertion_depth_t_mm": 84,
+   "collar_diameter_mm": 182,
+   "wall_mm": 4.0,
+   "status": "catalogue",
+   "source": "katalog str. 33",
+   "socket_zone_mm": 81,
+   "socket_zone_status": "catalogue (katalog str. 33 / výkres DN160)"
+  }
+ },
+ "pipes": {
+  "110": {
+   "dmax_mm": 127,
+   "wall_mm": 3.2,
+   "insertion_depth_t_mm": 66,
+   "status": "catalogue",
+   "source": "katalog str. 33",
+   "socket_zone_mm": 64,
+   "socket_zone_status": "catalogue (katalog str. 33 / výkres DN160)"
+  },
+  "125": {
+   "dmax_mm": 144,
+   "wall_mm": 3.2,
+   "insertion_depth_t_mm": 68,
+   "status": "catalogue",
+   "source": "katalog str. 33"
+  },
+  "160": {
+   "dmax_mm": 182,
+   "wall_mm": 4.0,
+   "insertion_depth_t_mm": 84,
+   "status": "catalogue",
+   "source": "katalog str. 33",
+   "socket_zone_mm": 81,
+   "socket_zone_status": "catalogue (katalog str. 33 / výkres DN160)"
+  }
+ },
+ "elbows": [
+  {
+   "angle_deg": 15,
+   "dn_od": 110,
+   "article": "220200",
+   "z1_mm": 9,
+   "z2_mm": 14,
+   "l1_mm": 69,
+   "radius_mm": 60,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 61.101,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 15,
+   "dn_od": 125,
+   "article": "221200",
+   "z1_mm": 10,
+   "z2_mm": 15,
+   "l1_mm": 77,
+   "radius_mm": 69,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 67.916,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 15,
+   "dn_od": 160,
+   "article": "222200",
+   "z1_mm": 13,
+   "z2_mm": 19,
+   "l1_mm": 94,
+   "radius_mm": 88,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 82.415,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 30,
+   "dn_od": 110,
+   "article": "220210",
+   "z1_mm": 17,
+   "z2_mm": 21,
+   "l1_mm": 77,
+   "radius_mm": 60,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 60.923,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 30,
+   "dn_od": 125,
+   "article": "221210",
+   "z1_mm": 19,
+   "z2_mm": 23,
+   "l1_mm": 86,
+   "radius_mm": 69,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 67.512,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 30,
+   "dn_od": 160,
+   "article": "222210",
+   "z1_mm": 24,
+   "z2_mm": 30,
+   "l1_mm": 105,
+   "radius_mm": 88,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 81.42,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 45,
+   "dn_od": 110,
+   "article": "220220",
+   "z1_mm": 25,
+   "z2_mm": 29,
+   "l1_mm": 85,
+   "radius_mm": 60,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 60.147,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 45,
+   "dn_od": 125,
+   "article": "221220",
+   "z1_mm": 28,
+   "z2_mm": 33,
+   "l1_mm": 95,
+   "radius_mm": 69,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 66.419,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 45,
+   "dn_od": 160,
+   "article": "222220",
+   "z1_mm": 36,
+   "z2_mm": 42,
+   "l1_mm": 117,
+   "radius_mm": 88,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 80.549,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 67,
+   "dn_od": 110,
+   "article": "220230",
+   "z1_mm": 40,
+   "z2_mm": 44,
+   "l1_mm": 100,
+   "radius_mm": 60,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 60.287,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 67,
+   "dn_od": 125,
+   "article": "221230",
+   "z1_mm": 46,
+   "z2_mm": 50,
+   "l1_mm": 113,
+   "radius_mm": 69,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 67.33,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 67,
+   "dn_od": 160,
+   "article": "222230",
+   "z1_mm": 58,
+   "z2_mm": 64,
+   "l1_mm": 139,
+   "radius_mm": 88,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 80.754,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 87,
+   "dn_od": 110,
+   "article": "220240",
+   "z1_mm": 57,
+   "z2_mm": 61,
+   "l1_mm": 117,
+   "radius_mm": 60,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 60.062,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 87,
+   "dn_od": 125,
+   "article": "221240",
+   "z1_mm": 65,
+   "z2_mm": 70,
+   "l1_mm": 132,
+   "radius_mm": 69,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 66.521,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  },
+  {
+   "angle_deg": 87,
+   "dn_od": 160,
+   "article": "222240",
+   "z1_mm": 83,
+   "z2_mm": 89,
+   "l1_mm": 164,
+   "radius_mm": 88,
+   "status": "catalogue",
+   "source": "katalog str. 35",
+   "series": "current",
+   "take_out_base_mm": 80.491,
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+  }
+ ],
+ "branches": [
+  {
+   "angle_deg": 45,
+   "dn_od": 110,
+   "branch_dn_od": 110,
+   "article": "220300",
+   "z1_mm": 25,
+   "z2_mm": 134,
+   "z3_mm": 134,
+   "L_mm": 219,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 45,
+   "dn_od": 125,
+   "branch_dn_od": 110,
+   "article": "221310",
+   "z1_mm": 18,
+   "z2_mm": 144,
+   "z3_mm": 141,
+   "L_mm": 226,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 45,
+   "dn_od": 125,
+   "branch_dn_od": 125,
+   "article": "221300",
+   "z1_mm": 28,
+   "z2_mm": 152,
+   "z3_mm": 152,
+   "L_mm": 247,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 45,
+   "dn_od": 160,
+   "branch_dn_od": 110,
+   "article": "222320",
+   "z1_mm": 2,
+   "z2_mm": 168,
+   "z3_mm": 159,
+   "L_mm": 242,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 45,
+   "dn_od": 160,
+   "branch_dn_od": 125,
+   "article": "222310",
+   "z1_mm": 12,
+   "z2_mm": 176,
+   "z3_mm": 169,
+   "L_mm": 262,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 45,
+   "dn_od": 160,
+   "branch_dn_od": 160,
+   "article": "222300",
+   "z1_mm": 36,
+   "z2_mm": 194,
+   "z3_mm": 194,
+   "L_mm": 311,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 87,
+   "dn_od": 110,
+   "branch_dn_od": 110,
+   "article": "220400",
+   "z1_mm": 59,
+   "z2_mm": 62,
+   "z3_mm": 62,
+   "L_mm": 197,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 87,
+   "dn_od": 125,
+   "branch_dn_od": 110,
+   "article": "221410",
+   "z1_mm": 59,
+   "z2_mm": 70,
+   "z3_mm": 63,
+   "L_mm": 204,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 87,
+   "dn_od": 125,
+   "branch_dn_od": 125,
+   "article": "221400",
+   "z1_mm": 66,
+   "z2_mm": 70,
+   "z3_mm": 70,
+   "L_mm": 218,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 87,
+   "dn_od": 160,
+   "branch_dn_od": 110,
+   "article": "222420",
+   "z1_mm": 60,
+   "z2_mm": 87,
+   "z3_mm": 65,
+   "L_mm": 225,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 87,
+   "dn_od": 160,
+   "branch_dn_od": 125,
+   "article": "222410",
+   "z1_mm": 67,
+   "z2_mm": 87,
+   "z3_mm": 72,
+   "L_mm": 239,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  },
+  {
+   "angle_deg": 87,
+   "dn_od": 160,
+   "branch_dn_od": 160,
+   "article": "222400",
+   "z1_mm": 84,
+   "z2_mm": 89,
+   "z3_mm": 89,
+   "L_mm": 273,
+   "status": "catalogue",
+   "source": "katalog str. 36",
+   "series": "current",
+   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+  }
+ ],
+ "reducers": [
+  {
+   "dn_od": 125,
+   "branch_dn_od": 110,
+   "article": "221700",
+   "z1_mm": 15,
+   "L_mm": 82,
+   "status": "catalogue",
+   "source": "katalog str. 37",
+   "series": "current"
+  },
+  {
+   "dn_od": 160,
+   "branch_dn_od": 110,
+   "article": "222700",
+   "z1_mm": 34,
+   "L_mm": 115,
+   "status": "catalogue",
+   "source": "katalog str. 37",
+   "series": "current"
+  },
+  {
+   "dn_od": 160,
+   "branch_dn_od": 125,
+   "article": "222710",
+   "z1_mm": 27,
+   "L_mm": 108,
+   "status": "catalogue",
+   "source": "katalog str. 37",
+   "series": "current"
+  }
+ ],
+ "caps": [
+  {
+   "dn_od": 110,
+   "article": "220630",
+   "length_mm": 41,
+   "status": "catalogue",
+   "source": "katalog str. 37",
+   "series": "current"
+  },
+  {
+   "dn_od": 125,
+   "article": "221630",
+   "length_mm": 45,
+   "status": "catalogue",
+   "source": "katalog str. 37",
+   "series": "current"
+  },
+  {
+   "dn_od": 160,
+   "article": "222630",
+   "length_mm": 53,
+   "status": "catalogue",
+   "source": "katalog str. 37",
+   "series": "current"
+  }
+ ],
+ "cleanouts": [
+  {
+   "dn_od": 110,
+   "article": "220600",
+   "length_mm": 359,
+   "status": "catalogue",
+   "source": "katalog str. 37",
+   "series": "current"
+  },
+  {
+   "dn_od": 125,
+   "article": "221600",
+   "length_mm": 365,
+   "status": "catalogue",
+   "source": "katalog str. 37",
+   "series": "current"
+  },
+  {
+   "dn_od": 160,
+   "article": "222600",
+   "length_mm": 394,
+   "status": "catalogue",
+   "source": "katalog str. 37",
+   "series": "current"
+  }
+ ],
+ "references": {
+  "220000z": {
+   "mesh": "ostendorf/220000z.json",
+   "summary": "STEP výrobní model; DN110, celková délka 564 mm, límec 125,6 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "220200z": {
+   "mesh": "ostendorf/220200z.json",
+   "summary": "STEP výrobní model; koleno 15° DN110, take-out 70,1 / 70,9 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "220210z": {
+   "mesh": "ostendorf/220210z.json",
+   "summary": "STEP výrobní model; koleno 30° DN110, take-out 76,9 / 76,7 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "220220z": {
+   "mesh": "ostendorf/220220z.json",
+   "summary": "STEP výrobní model; koleno 45° DN110, R 56,5 mm, take-out 88,4 / 87,4 mm, límec 126,9 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "220300z": {
+   "mesh": "ostendorf/220300z.json",
+   "summary": "STEP výrobní model; odbočka 45° 110/110, hrot–hnízdo 215,7 mm, průsečík 90,65 / 125,05 mm, odbočka 187,3 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "220400z": {
+   "mesh": "ostendorf/220400z.json",
+   "summary": "STEP výrobní model; odbočka 87° 110/110, hrot–hnízdo 179,0 mm, průsečík 132,15 / 46,85 mm, odbočka 118,6 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "222000z": {
+   "mesh": "ostendorf/222000z.json",
+   "summary": "STEP výrobní model; DN160 trubka, celková délka 581 mm, límec 180,4 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "222000z-socket": {
+   "mesh": "ostendorf/222000z-socket.json",
+   "summary": "STEP výrobní model; samostatně extrahované hrdlo DN160, navazuje na měření trubky 222000z.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "222200z": {
+   "mesh": "ostendorf/222200z.json",
+   "summary": "STEP výrobní model; koleno 15° DN160, měřený mesh výrobního modelu.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "222210z": {
+   "mesh": "ostendorf/222210z.json",
+   "summary": "STEP výrobní model; koleno 30° DN160, měřený mesh výrobního modelu.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "222320z": {
+   "mesh": "ostendorf/222320z.json",
+   "summary": "STEP výrobní model; odbočka 45° 160/110, hrot–hnízdo 317,5 mm, průsečík 86,0 / 231,5 mm, odbočka 227,4 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "222420z": {
+   "mesh": "ostendorf/222420z.json",
+   "summary": "STEP výrobní model; odbočka 87° 160/110, hrot–hnízdo 273,5 mm, průsečík 143,7 / 129,8 mm, odbočka 143,0 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "222700z": {
+   "mesh": "ostendorf/222700z.json",
+   "summary": "STEP výrobní model; redukce 160/110, hrot DN160–hnízdo DN110 176,5 mm, osové odsazení 23,1 mm.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  },
+  "175600z": {
+   "mesh": "ostendorf/175600z.json",
+   "summary": "STEP výrobní model; čistící kus DN110, obálka 127,4 × 150,3 × 238,5 mm, tři ústí.",
+   "status": "measured",
+   "source": "STEP výrobní model"
+  }
+ }
+}

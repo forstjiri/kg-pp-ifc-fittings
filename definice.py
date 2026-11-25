@@ -14,6 +14,9 @@ class Port:
     axis: tuple[float, float, float]
     flow: str
     od_mm: float
+    end_type: str = "SOCKET"  # SOCKET | SPIGOT
+    insertion_mm: float | None = None  # catalogue insertion depth t
+    take_out_mm: float | None = None  # catalogue take-out (vertex -> face)
 
 
 @dataclass(frozen=True)

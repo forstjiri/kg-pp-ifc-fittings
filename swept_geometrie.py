@@ -111,7 +111,7 @@ def socket_run_lathes(length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm, socke
     od, wall = float(od_mm), float(wall_mm)
     length, cup_len, start = float(length_mm), float(cup_len_mm), float(start_mm)
     axis = _unit(direction)
-    if length <= 2 * cup_len * 0.6:
+    if length < cup_len:
         raise ValueError("run shorter than its sockets")
     tube = tube_lathe(od, wall, length, start=(tuple(start * axis)), direction=axis)
     cup = socket_cup_profile(od, wall, socket_od_mm, cup_len, cup_len * 0.956)
@@ -201,26 +201,35 @@ def cleanout_lathes(
     return SweptBody(run.lathes + (stub, cover)), mouths
 
 
-def elbow_lathes(angle_deg, od_mm, socket_od_mm=None, wall_mm=None):
-    """Elbow from the measured Ostendorf KG 45 deg OD110 reference (reference_canonical.json).
+def elbow_lathes(
+    angle_deg, od_mm, socket_od_mm=None, wall_mm=None,
+    socket_straight_mm=None, spigot_straight_mm=None, radius_mm=None,
+    socket_len_mm=None, spigot_tip_mm=None,
+):
+    """Elbow with explicit dimensions (mm); None falls back to the measured
+    Ostendorf KG 45 deg OD110 reference (220220z), scaled by OD.
 
-    Centreline: straight socket run, true circular arc, straight spigot run.
-    All lengths scale with the body OD; the angle drives the bend.
+    Centreline: straight socket run `socket_straight_mm`, circular arc with
+    `radius_mm`, straight spigot run `spigot_straight_mm`. `socket_len_mm` is
+    the cup depth, `spigot_tip_mm` the plain spigot-tip length before the body.
     """
     angle = np.deg2rad(float(angle_deg))
     od = float(od_mm)
     if not 0 < angle < np.pi or od <= 0:
         raise ValueError("elbow needs a positive OD and an angle between 0 and 180 degrees")
     scale = od / 110.4
-    radius, tangent_start, tangent_end = 56.5 * scale, 65.0 * scale, 64.0 * scale
+    radius = 56.5 * scale if radius_mm is None else float(radius_mm)
+    tangent_start = 65.0 * scale if socket_straight_mm is None else float(socket_straight_mm)
+    tangent_end = 64.0 * scale if spigot_straight_mm is None else float(spigot_straight_mm)
     wall = 3.3 * scale if wall_mm is None else float(wall_mm)
     r_body, r_bore = od / 2, od / 2 - wall
-    socket_len = 57.0 * scale
+    socket_len = 57.0 * scale if socket_len_mm is None else float(socket_len_mm)
+    tip_len = 30.0 * scale if spigot_tip_mm is None else float(spigot_tip_mm)
     r_collar = (126.9 * scale if socket_od_mm is None else float(socket_od_mm)) / 2
     r_cup = (110.99 * scale) / 2
     r_mouth = r_body + (58.4 - 55.2) * scale  # narrow face lip measured on the reference
     groove = r_collar - 3.0 * scale
-    if r_cup <= r_body - wall or r_collar <= r_body + 3.0 * scale or tangent_start <= socket_len or tangent_end <= 30 * scale:
+    if r_cup <= r_body - wall or r_collar <= r_body + 3.0 * scale or tangent_start <= socket_len or tangent_end <= tip_len:
         raise ValueError("elbow dimensions do not leave a body between the ends")
 
     # outer skin measured on the reference: lip, two thin retaining rings, grooves between/behind
@@ -230,12 +239,12 @@ def elbow_lathes(angle_deg, od_mm, socket_od_mm=None, wall_mm=None):
         (r_body + 0.3 * scale, 16.8 * scale), (r_collar, 17.8 * scale), (r_collar, 18.8 * scale),
         (r_body + 3.6 * scale, 19.2 * scale), (r_body, 21.0 * scale), (r_body, tangent_start),
         # back along the bore and the slightly conical cup wall (never outside the outer skin)
-        (r_bore, tangent_start), (r_bore, 61.0 * scale),
-        (r_bore + 1.7 * scale, 54.5 * scale), (r_cup, 0.0),
+        (r_bore, tangent_start), (r_bore, socket_len + 4.0 * scale),
+        (r_bore + 1.7 * scale, socket_len * 0.956), (r_cup, 0.0),
     )
     spigot_profile = (
-        (r_bore, 0.0), (od / 2 - 0.1 * scale, 0.0), (od / 2 - 0.1 * scale, 30 * scale),
-        (r_body, 30 * scale), (r_body, tangent_end), (r_bore, tangent_end),
+        (r_bore, 0.0), (od / 2 - 0.1 * scale, 0.0), (od / 2 - 0.1 * scale, tip_len),
+        (r_body, tip_len), (r_body, tangent_end), (r_bore, tangent_end),
     )
     d0 = np.array((0.0, 1.0, 0.0))
     d1 = np.array((np.sin(angle), np.cos(angle), 0.0))
