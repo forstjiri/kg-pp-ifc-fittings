@@ -351,7 +351,8 @@ def _grid_items(file, kind, article):
 def _grid_body(kind, article):
     if kind == "reducer":
         return reducer_lathes(
-            176.5, 160, 110, 4.0, 3.2, 182, 127, 84, 66, offset_mm=23.1)[0]
+            176.5, 160, 110, 4.0, 3.2, 194, 127, 84, 66, offset_mm=23.1,
+            straight_large_mm=88, cone_len_mm=29)[0]
     if kind == "cleanout":
         return cleanout_lathes(238.5, 110, 3.2, 127, 66, 143.0, 71.5)[0]
     raise ValueError(kind)

@@ -54,11 +54,13 @@ def test_kg_branch_matches_step_reference(article):
 
 def test_kg_eccentric_reducer_matches_step_reference():
     body, mouths = reducer_lathes(
-        176.5, 160, 110, 4.0, 3.2, 182, 127, 84, 66, offset_mm=23.1,
+        176.5, 160, 110, 4.0, 3.2, 194, 127, 84, 66, offset_mm=23.1,
+        straight_large_mm=88, cone_len_mm=29,
     )
     scores = _scores(body, "222700z")
-    # kužel je souosý, excentricita je jen na hnízdu malého konce
-    assert min(scores.values()) >= 0.45 and max(scores.values()) >= 0.60, scores
+    # kužel je souosý, excentricita je jen na hnízdu malého konce; Y pohled
+    # brzdí neviditelné bory
+    assert min(scores.values()) >= 0.50 and max(scores.values()) >= 0.70, scores
 
 
 def test_kg_cleanout_matches_step_reference():

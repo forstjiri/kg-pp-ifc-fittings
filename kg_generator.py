@@ -174,12 +174,13 @@ def kg_items():
         definition = _definition(
             f"KG redukce OD{dn}/{small}", row["article"], "TRANSITION",
             dn, 0, length, row["z1_mm"], 0, ports, branch_od=small,
-            status="estimated: souosý kužel s rovným válcem, excentricita na malém hnízdu; oba konce hnízda",
+            status="estimated: souosý kužel s rovným válcem, excentricita na malém hnízdu; oba konce hnízda; tvar hrdla ze STEP 222700z (plný boss OD194×88, kužel 29 mm)",
         )
         body, _ = reducer_lathes(
             length, float(dn), float(small), sock["wall_mm"], bsock["wall_mm"],
-            sock["collar_diameter_mm"], bsock["collar_diameter_mm"], t, tb,
-            offset_mm=offset,
+            float(sock["collar_diameter_mm"]) + 12.0 * dn / 160.0, bsock["collar_diameter_mm"],
+            t, tb, offset_mm=offset,
+            straight_large_mm=88.0 * dn / 160.0, cone_len_mm=29.0 * dn / 160.0,
         )
         items.append((definition, body))
 

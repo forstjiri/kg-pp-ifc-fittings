@@ -69,11 +69,14 @@ def arc_lathe(r_body, r_bore, start, tangent_in, tangent_out, radius):
     )
 
 
-def socket_cup_profile(od_mm, wall_mm, socket_od_mm, bore_end_mm, cone_end_mm):
+def socket_cup_profile(od_mm, wall_mm, socket_od_mm, bore_end_mm, cone_end_mm,
+                       sleeve_len_mm=None):
     """Concentric socket cup, scaled from the measured KG OD110 reference.
 
     Closed meridian section: mouth lip, two retaining rings with grooves, taper to
     the body wall, straight bore to `bore_end_mm`, conical cup back to the lip.
+    With `sleeve_len_mm` the collar OD continues as a full boss up to that depth
+    (measured on the STEP eccentric reducer: thick socket, not a body + ring).
     """
     od = float(od_mm)
     scale = od / 110.4
@@ -85,13 +88,19 @@ def socket_cup_profile(od_mm, wall_mm, socket_od_mm, bore_end_mm, cone_end_mm):
     groove = r_collar - 3.0 * scale
     if r_collar <= r_mouth + 0.5 * scale or groove <= r_mouth or r_bore + 1.7 * scale >= r_cup:
         raise ValueError("socket proportions do not fit the measured ring stack")
+    outer_tail = (
+        (r_body, 21.0 * scale),
+        (r_collar, 22.5 * scale),
+        (r_collar, float(sleeve_len_mm)),
+    ) if sleeve_len_mm else ((r_body, float(bore_end_mm)),)
     return (
         (r_cup, 0.0), (r_mouth, 0.0), (r_mouth, 3.0 * scale),
         (r_collar, 3.8 * scale), (r_collar, 5.0 * scale),
         (groove, 6.2 * scale), (groove, 15.8 * scale),
         (r_body + 0.3 * scale, 16.8 * scale), (r_collar, 17.8 * scale), (r_collar, 18.8 * scale),
-        (r_body + 3.6 * scale, 19.2 * scale), (r_body, 21.0 * scale),
-        (r_body, float(bore_end_mm)), (r_bore, float(bore_end_mm)),
+        (r_body + 3.6 * scale, 19.2 * scale),
+        *outer_tail,
+        (r_bore, float(bore_end_mm)),
         (r_bore + 1.7 * scale, float(cone_end_mm)),
     )
 
@@ -130,28 +139,35 @@ def socket_run_lathes(length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm, socke
 def reducer_lathes(
     length_mm, od_large, od_small, wall_large, wall_small,
     socket_od_large, socket_od_small, cup_len_large, cup_len_small,
-    offset_mm=0.0, straight_large_mm=0.0,
+    offset_mm=0.0, straight_large_mm=0.0, cone_len_mm=None,
 ):
-    """Reducer along +Y: straight socket cylinder, then a conical wall tube.
+    """Reducer along +Y: socket boss, cone, then straight small socket section.
 
     Socket cup at each end; `offset_mm` shifts the small end sideways
-    (eccentric reducer), `straight_large_mm` is the straight cylinder length
-    at the large socket before the cone starts.
+    (eccentric reducer). `straight_large_mm` is the straight cylinder length
+    at the large socket before the cone starts; `cone_len_mm` the cone length
+    (default: cone runs to the small mouth). Measured on STEP 222700z: boss
+    OD194 x 88 mm, cone 29 mm, then straight OD110.
     """
     length = float(length_mm)
     straight = min(float(straight_large_mm), length - 5.0)
+    cone_end = length if cone_len_mm is None else min(
+        straight + float(cone_len_mm), length)
     r_large_body = float(od_large) / 2
     r_small_body = float(od_small) / 2
     r_bore_large = r_large_body - float(wall_large)
     cone_profile = (
         (r_bore_large, 0.0), (r_large_body, 0.0),
         (r_large_body, straight),
+        (r_small_body, cone_end),
         (r_small_body, length),
         (r_small_body - float(wall_small), length),
         (r_bore_large, straight),
     )
     body = straight_lathe(cone_profile, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0))
-    cup_large = socket_cup_profile(od_large, wall_large, socket_od_large, cup_len_large, cup_len_large * 0.956)
+    cup_large = socket_cup_profile(
+        od_large, wall_large, socket_od_large, cup_len_large,
+        cup_len_large * 0.956, sleeve_len_mm=cup_len_large)
     cup_small = socket_cup_profile(od_small, wall_small, socket_od_small, cup_len_small, cup_len_small * 0.956)
     offset = float(offset_mm)
     lathes = (
