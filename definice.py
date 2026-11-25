@@ -37,6 +37,7 @@ class Fitting:
     branch_od_mm: float | None = None
     z3_mm: float | None = None
     geometry_status: str | None = None
+    legacy_article: str | None = None
 
 
 # Ostendorf KG 220220 (DN/OD 110, 45°); catalogue dimensions in mm.

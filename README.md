@@ -1,24 +1,24 @@
 # Parametrické IFC tvarovky
 
-Generate both IFC4 Project Libraries with:
-
 ```sh
-.venv/bin/python generate_all.py
+.venv/bin/python generate_all.py            # obě knihovny
+.venv/bin/python generate_all.py --preview   # + mřížka vzorků do out/preview-*.ifc
+.venv/bin/python -m pytest tests -q
 ```
 
-Outputs:
+Výstupy (IFC4 Project Library, `IfcPipeFittingType` + vzorové výskyty s porty):
 
-- `out/tvarovky-EN1401-1.ifc` — current KG catalogue subset (Ostendorf STEP-derived fittings).
-- `out/tvarovky-EN1451-1.ifc` — Pipelife MASTER 3 PLUS elbows, single branches,
-  reducers and vertical inspection pieces.
+- `out/tvarovky-EN1401-1.ifc` — Ostendorf KG: 15 kolen, 12 odboček, 3 redukce, 3 zátky, 3 čistící kusy (36 typů, 292 kB).
+- `out/tvarovky-EN1451-1.ifc` — Pipelife Master 3 Plus: 33 kolen, 35 odboček, 10 redukcí, 5 čistících kusů, 6 zátek (90 typů, 755 kB).
 
-PP dimensions are kept in `data/pipelife_master3plus.json`. Every PP fitting is
-an exact IFC4 SweptSolid (`swept_geometrie.py`): `IfcRevolvedAreaSolid` lathes —
-hollow-circle revolve for bends, overlapping straight lathes (tube + socket
-cups) for runs, reducers, branches and cleanouts. No booleans, no tessellation;
-bends match the measured Ostendorf reference at IoU ≥ 0.97 in all three axes.
-KG approximate fittings (`geometrie.py`, `pp_geometrie.py` legacy meshes) remain
-explicitly approximate, not manufacturing geometry.
+Obě knihovny jsou čistě `IfcRevolvedAreaSolid` (SweptSolid) — žádné `IfcTriangulatedFaceSet`, žádné booleany. Rozměry žijí v `data/kg_ostendorf.json` a `data/pipelife_master3plus.json` Odděleně od geometrie; každá hodnota nese `status` (`catalogue`/`measured`/`estimated`), `source` a `series`. Chybějící rozměry jsou v IFC v `GeometryStatus`.
 
-Run checks with `.venv/bin/python -m pytest tests -q`. Bonsai Project Library UI
-validation still requires an active Blender/Bonsai bridge.
+Porty mají `EndType` (`SOCKET`/`SPIGOT`), `InsertionDepth` (katalogové `t`) a `TakeOut`; hnízdo je v ústí, hrot o `t` uvnitř těla. U KGB je natočení hnízda (rovně/šikmo) vlastnost článku změřená ze STEP.
+
+Nástroje:
+
+- `tools/measure_reference.py <mesh.json>` — ústí, osy, OD/ID výrobního STEPu.
+- `tools/build_comparison.py` — `out/compare-kgb.ifc`: STEP vlevo, SweptSolid vpravo, stejný rám (KGB 15°/30°/45° OD110).
+- `tools/build_preview.py --standard kg|pp|all` — mřížka vzorků pro Blender.
+
+IoU proti STEP referencím: kolena ≥ 0,85 ve všech třech pohledech; odbočky, excentrická redukce a čistící kus mají rodinové prahy, protože jejich hnízda a křižovatky jsou approximated (viz `missing.md`).

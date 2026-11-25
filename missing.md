@@ -2,38 +2,35 @@
 
 Checklist věcí, které knihovna zatím **neřeší**. Odškrtnuté = doplněno.
 
-## Rodiny kusů (dohodnuto odložit)
+## Rodiny kusů (odloženo)
 
-- [ ] Objímky a dvojobjímky, posuvná/prodloužená hrdla (Master 3 Plus: „dvojité/přesuvné hrdlo", „prodloužené hrdlo")
-- [ ] Větrací odbočka (ventilation branch)
-- [ ] UV větrací hlavice
-- [ ] Sifonové adaptéry / připojovací sifonové kusy
-- [ ] Revizní kus 87.5° v ose toku s odnímatelným víčkem (inline)
-- [ ] Čistící kus 45° varianta
+- [ ] Objímky a dvojobjímky, posuvná/prodloužená hrdla
+- [ ] Větrací odbočka a UV větrací hlavice
+- [ ] Sifonové adaptéry
+- [ ] Revizní kus 87,5° v ose toku (inline) a 45° varianta čistícího kusu
 - [ ] Akustická objímka
-- [ ] Rovné trubky (řeší samostatný barak generátor, ne knihovna)
+- [ ] Rovné trubky (řeší barak generátor, ne tato knihovna)
+- [ ] EN 1329-1 (PVC-U HT, 32–75) — případný třetí soubor
 
-## Normy a průměry k ověření
+## Vyřešené v poslední iteraci
 
-- [x] EN 1401-1 (PVC-U KG): Ostendorf katalog potvrzuje DN/OD **125**; pole `KG_OD` je `110, 125, 160`
-- [x] EN 1401-1: katalogová kolena 15°/30°/45°/67°/87° pro OD110/125/160 a odbočky 45°/87° s hlavním i bočním OD do 160 jsou zahrnuty; část geometrie je aproximovaná a označená v IFC
-- [x] KG OD200–500 se v Ostendorf katalogu prodává, ale je mimo explicitní rozsah plánu EN1401-1 (`110, 160`, ověřit `125`); rozšíření vyžaduje změnu rozsahu
-- [ ] EN 1329-1 (PVC-U HT) pro malé průměry PVC-U 32–75 — případný třetí soubor, zatím vynecháno
-- [x] KG (EN 1401-1) čistící kus — Ostendorf KGRE články 220600/221600/222600; katalogové délky zahrnuty. Tělo a víčko jsou jen přibližná koordinační geometrie.
+- [x] KG i PP knihovny jsou čistě SweptSolid; síťové výrobní meshe slouží jen jako testovací reference
+- [x] KG 15 kolen, 12 odboček, 3 excentrické redukce, 3 zátky, 3 čistící kusy; PP kóty z příručky 2026 včetně zátek a aktuálních článků M3-…
+- [x] Staré články 3496… jsou v Psetu jako `LegacyArticle`, ne jako samostatné typy
+- [x] Porty mají `EndType`, `InsertionDepth` (t), `TakeOut`; natočení hnízda KGB je „measured" ze STEP, „estimated" u zbylých článků
+- [x] IoU 5 kolenních referencí ≥ 0,85 ve X/Y/Z po opravě kanonického rámu (dřívější nižší skóre byla chyba registrace, ne tvaru)
 
-## Detaily napojení
+## Stále otevřené
 
-- [ ] Ověřit hloubky zasunutí a rozměry hrdel pro EN 1401-1 z Ostendorf tabulek (PP Master 3 Plus máme: Lesp)
-- [ ] Těsnění (prstenec) — zda modelovat jako součást těla hrdla
-- [ ] Záslepky: varianta se závitem vs. hladká (dle katalogů)
+- [ ] KG odbočky: katalogní `L` nesedí na STEP (např. 160/110: 242 vs 317,5 mm); 4 články jsou `measured`, 8 `estimated` škálováním
+- [ ] Těsnicí prstenec/drážka hnízda není součástí těla; jen aproximovaný profil
+- [ ] KG DN125 hnízdo (límec, zóna) je jen katalogové, bez STEP měření
+- [ ] Barak pilot počítá u DN160 povytažení 81 − 10 = 71 mm, katalogový `t` = 84; funkční rozdíl ověřit při spojení v projektu
+- [ ] Booleany na křižovatkách odboček: tělě se překrývají, bez vnitřního vyříznutí
+- [ ] IoU odboček/redukce/čistícího kusu má rodinové prahy (min 0,55/0,45/0,25), ne 0,85; je to hrubá kontrola, ne přesnost výrobku
+- [ ] Funkční zkouška v Bonsai: odbočka KG 160/110 — trubka OD110 — koleno 45° OD110, porty po importu a zasunutí
+- [ ] PP stará řada (2021) má „oblouk 87,5°" bez hnízda — ponecháno mimo knihovnu
 
-## Geometrie a porty (review 2026-11)
+## Nástroje a validace
 
-- [ ] **PP kolena: katalogové kóty l1/l2/z1/z2 nemají v repozitáři legendu a čísla jsou navzájem nekonzistentní** (M3-B100/45: l1+l2=119,6 ≠ length 92). Porty kol proto berou take-outy z měřeného KG receptu, nikoli z PP tabulky. Nelze z kót jednoznačně odvodit R ohybu — totéž odůvodnění, proč KG kolena zůstávají aproximovaná.
-- [ ] **KG aproximovaná kolena** zůstávají síťová (Bezier), katalogové L/z nejsou jednoznačné.
-- [ ] IoU verifikace měří tessellaci OCCT kernelu (display mesh). Případný budoucí přechod na vlastní analytický sampler (swept_bounds emitující quads) + invarianty `geometry.edges == []` a objem vs. Σ Pappus (θ·A·ρ̄) ± 3 %.
-- [ ] Reference IoU je "see-through" síť (bez vnitřních stěn) — Y-pohled stagnuje kolem 0,92; neladit proti ní.
-- [ ] Validovat porty odboček/redukcí proti katalogovým bodům odběru (nyní převzaty 1:1 z mesh verze).
-- [ ] Podrobný rozsah: PP katalog obsahuje i průměry 63/90 mimo LIBRARY_SIZES — zahrnout, jen pokud plán rozšíříme.
-- [x] SweptSolid rozšířen na všechny PP rodiny: kolena, odbočky (překryv těles na křižovatce, bez booleanů), redukce, spojky, čistící kusy. KG zátka/odbočky/redukce zůstávají síťové (approx).
-- [x] SOURCE port KG excentrické redukce OD160/110 ověřen: leží v rovině kompletního prstence vrcholů, soustředý.
+- [ ] Pset_FittingBend / Pset_FittingJunction / Pset_FittingTransition — ověřit použitelnost v cílovém IFC4 a případně doplnit standardní vlastnosti (podnět z OSArch)

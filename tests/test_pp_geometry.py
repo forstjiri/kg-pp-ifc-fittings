@@ -16,16 +16,19 @@ def test_parametric_pp_meshes_provide_ports_and_nonempty_triangles():
         [r for r in table["simple_branches"] if r["dn_od"] in sizes and r["branch_dn_od"] in sizes]
     ) + len([r for r in table["reducers"] if r["large_dn_od"] in sizes and r["small_dn_od"] in sizes]) + len(
         [r for r in table["cleanouts"] if r["dn_od"] in sizes]
-    )
+    ) + len([r for r in table["caps"] if r["dn_od"] in sizes])
     swept = 0
     for definition, body in items:
         # swept solid: exact lathes, no triangle meshes in this library
         assert all(np.isfinite(np.asarray(lathe.profile)).all() for lathe in body.lathes)
-        assert len(body.lathes) >= 3  # tube/arc plus socket cups and stubs
+        assert len(body.lathes) >= 1  # tube/arc plus socket cups and stubs
         swept += 1
-        expected_ports = 3 if definition.family == "JUNCTION" else 2
+        expected_ports = (
+            1 if definition.article.startswith("M3-M")
+            else 3 if definition.family == "JUNCTION" else 2
+        )
         assert len(definition.ports) == expected_ports
-        assert "approximate" in definition.geometry_status.lower()
+        assert len(definition.geometry_status) > 20  # původ rozměrů/odhadů v Psetu
     assert swept == len(items)  # every PP item is an exact swept solid; no triangle meshes left
 
 

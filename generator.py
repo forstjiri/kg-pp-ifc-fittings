@@ -315,6 +315,8 @@ def generate_catalogue_library(items, output_path, name="PVC-U KG"):
                 properties["Z3"] = definition.z3_mm
         if getattr(definition, "geometry_status", None):
             properties["GeometryStatus"] = definition.geometry_status
+        if getattr(definition, "legacy_article", None):
+            properties["LegacyArticle"] = definition.legacy_article
         _add_properties(file, fitting_type, "Pset_Tvarovka", properties)
         for index, (port, position, axis) in enumerate(
             zip(definition.ports, record["port_positions"], record["port_axes"]), start=1
