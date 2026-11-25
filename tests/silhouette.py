@@ -63,8 +63,43 @@ def _mask(points, triangles, low, high, pixels_per_mm=2.0):
     return mask
 
 
-def iou(model, reference):
-    """IoU per orthogonal view with bbox-centre registration."""
+def pca_register(model, reference):
+    """Rotation aligning a STEP reference mesh to a model mesh.
+
+    Manufacturing meshes have arbitrary frames. PCA supplies the axes; try
+    all sign/axis permutations (proper rotations only) and keep the one with
+    the best coarse IoU. Returns a 3x3 rotation for the reference vertices.
+    """
+    import itertools
+
+    mv, mf = model
+    rv, rf = reference
+    a = mv - mv.mean(axis=0)
+    b = rv - rv.mean(axis=0)
+    _, va = np.linalg.eigh(a.T @ a)
+    _, vb = np.linalg.eigh(b.T @ b)
+    best = (-1.0, None)
+    for perm in itertools.permutations(range(3)):
+        for signs in itertools.product((-1.0, 1.0), repeat=3):
+            diag = np.diag(signs)
+            rotation = va[:, perm] @ diag @ vb.T
+            if np.linalg.det(rotation) < 0:
+                continue
+            aligned = (rv @ rotation, rf)
+            scores = iou(model, aligned, search_mm=0, pixels_per_mm=0.5)
+            quality = sum(scores.values())
+            if quality > best[0]:
+                best = (quality, rotation)
+    return best[1]
+
+
+def iou(model, reference, search_mm=10.0, pixels_per_mm=2.0):
+    """IoU per orthogonal view, bbox-centre registration + small shift search.
+
+    A STEP-derived mouth centre can be off by several mm (unevenly tessellated
+    flat annuli), so allow a +/-10 mm registration adjustment; the score still
+    guards the overall shape, not minute rim details.
+    """
     scores = {}
     for view, axes in {"X": (1, 2), "Y": (0, 2), "Z": (0, 1)}.items():
         (mv, mt), (rv, rt) = model, reference
@@ -73,7 +108,19 @@ def iou(model, reference):
         extents = np.vstack((m - mc, r - rc))
         low = extents.min(0) - 3
         high = extents.max(0) + 3
-        a = _mask(m - mc, mt, low, high)
-        b = _mask(r - rc, rt, low, high)
-        scores[view] = float(np.count_nonzero(a & b) / np.count_nonzero(a | b))
+        a = _mask(m - mc, mt, low, high, pixels_per_mm)
+        b = _mask(r - rc, rt, low, high, pixels_per_mm)
+        area_a = int(np.count_nonzero(a))
+        best = 0.0
+        step = max(1, int(round(2 * pixels_per_mm)))
+        span = int(search_mm * pixels_per_mm)
+        shifts = range(-span, span + 1, step)
+        for dy in shifts:
+            for dx in shifts:
+                shifted = np.roll(np.roll(b, dy, axis=0), dx, axis=1)
+                intersection = int(np.count_nonzero(a & shifted))
+                union = area_a + int(np.count_nonzero(shifted)) - intersection
+                if union:
+                    best = max(best, intersection / union)
+        scores[view] = best
     return scores

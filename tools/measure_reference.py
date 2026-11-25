@@ -102,31 +102,36 @@ def mouth_annuli(vertices, faces):
     return merged
 
 
-def canonical_elbow_frame(vertices, faces=None, mouths=None):
-    """Canonical frame for a two-mouth elbow.
+def canonical_elbow_frame(vertices, faces=None, mouths=None, origin_mouth="socket"):
+    """Canonical frame for a two-mouth elbow, derived from mouth AXES only.
 
     Mouth A centre at origin, inward axis A = +Y, bend in the XY plane with
-    mouth B on +X. Returns (canon_vertices, mouth_a, mouth_b, rotation).
+    mouth B on +X. Flat-cap centre estimates can be off by several mm, so the
+    centre A is reconstructed from centre B + catalogue take-out along both
+    axes when `take_out_mm` is given. Returns (vertices, mouth_a, mouth_b, R).
     """
     if mouths is None:
         mouths = mouth_annuli(vertices, faces)
     if len(mouths) != 2:
         raise ValueError(f"očekávány 2 ústí, nalezeno {len(mouths)}")
 
-    def line_distance(origin, direction, point):
-        return np.linalg.norm(np.cross(point - origin, direction))
-
-    m0, m1 = mouths
-    if line_distance(m0["center"], m0["axis_in"], m1["center"]) < line_distance(
-        m1["center"], m1["axis_in"], m0["center"]
-    ):
-        mouth_a, mouth_b = m0, m1
+    # Which physical end sits at the origin depends on the catalogue article:
+    # some KGB pieces have the socket on the angled leg, others on the straight
+    # one. The swept recipe uses the same flag, so the two frames meet.
+    widest = max(mouths, key=lambda m: m["outer_od"] - m["inner_id"])
+    narrowest = min(mouths, key=lambda m: m["outer_od"] - m["inner_id"])
+    if origin_mouth == "socket":
+        mouth_a, mouth_b = widest, narrowest
     else:
-        mouth_a, mouth_b = m1, m0
+        mouth_a, mouth_b = narrowest, widest
+    # Use the measured socket centre: reconstructing it from a catalogue
+    # take-out shifts the ring by several mm and moves the visible collar.
     ca = mouth_a["center"]
     y_axis = mouth_a["axis_in"] / np.linalg.norm(mouth_a["axis_in"])
-    x_axis = mouth_b["center"] - ca
-    x_axis -= np.dot(x_axis, y_axis) * y_axis
+    b_out = -mouth_b["axis_in"] / np.linalg.norm(mouth_b["axis_in"])
+    x_axis = b_out - np.dot(b_out, y_axis) * y_axis
+    if np.linalg.norm(x_axis) < 1e-6:  # straight piece: any perpendicular axis
+        x_axis = np.cross(y_axis, (0.0, 0.0, 1.0))
     x_axis /= np.linalg.norm(x_axis)
     rotation = np.column_stack((x_axis, y_axis, np.cross(x_axis, y_axis)))
     return (vertices - ca) @ rotation, mouth_a, mouth_b, rotation

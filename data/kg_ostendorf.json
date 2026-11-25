@@ -71,7 +71,11 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 61.101,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": false,
+   "socket_orientation_status": "measured (STEP 220200z)",
+   "reference_origin": "socket",
+   "reference_origin_status": "measured (STEP 220200z)"
   },
   {
    "angle_deg": 15,
@@ -85,7 +89,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 67.916,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": false,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   },
   {
    "angle_deg": 15,
@@ -99,7 +106,11 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 82.415,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": true,
+   "socket_orientation_status": "measured (STEP 222200z)",
+   "reference_origin": "spigot",
+   "reference_origin_status": "measured (STEP 222200z)"
   },
   {
    "angle_deg": 30,
@@ -113,7 +124,11 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 60.923,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": true,
+   "socket_orientation_status": "measured (STEP 220210z)",
+   "reference_origin": "socket",
+   "reference_origin_status": "measured (STEP 220210z)"
   },
   {
    "angle_deg": 30,
@@ -127,7 +142,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 67.512,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": true,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   },
   {
    "angle_deg": 30,
@@ -141,7 +159,11 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 81.42,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": true,
+   "socket_orientation_status": "measured (STEP 222210z)",
+   "reference_origin": "socket",
+   "reference_origin_status": "measured (STEP 222210z)"
   },
   {
    "angle_deg": 45,
@@ -155,7 +177,11 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 60.147,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": false,
+   "socket_orientation_status": "measured (STEP 220220z)",
+   "reference_origin": "socket",
+   "reference_origin_status": "measured (STEP 220220z)"
   },
   {
    "angle_deg": 45,
@@ -169,7 +195,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 66.419,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": false,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   },
   {
    "angle_deg": 45,
@@ -183,7 +212,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 80.549,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": true,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   },
   {
    "angle_deg": 67,
@@ -197,7 +229,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 60.287,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": false,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   },
   {
    "angle_deg": 67,
@@ -211,7 +246,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 67.33,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": false,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   },
   {
    "angle_deg": 67,
@@ -225,7 +263,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 80.754,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": true,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   },
   {
    "angle_deg": 87,
@@ -239,7 +280,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 60.062,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": false,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   },
   {
    "angle_deg": 87,
@@ -253,7 +297,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 66.521,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": false,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   },
   {
    "angle_deg": 87,
@@ -267,7 +314,10 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 80.491,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets"
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "socket_on_spigot": true,
+   "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
+   "reference_origin": "socket"
   }
  ],
  "branches": [

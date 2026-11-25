@@ -130,6 +130,7 @@ def socket_run_lathes(length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm, socke
 def reducer_lathes(
     length_mm, od_large, od_small, wall_large, wall_small,
     socket_od_large, socket_od_small, cup_len_large, cup_len_small,
+    offset_mm=0.0,
 ):
     """Concentric reducer: conical wall tube with an overlapping socket cup at each end."""
     length = float(length_mm)
@@ -143,14 +144,15 @@ def reducer_lathes(
     )
     cup_large = socket_cup_profile(od_large, wall_large, socket_od_large, cup_len_large, cup_len_large * 0.956)
     cup_small = socket_cup_profile(od_small, wall_small, socket_od_small, cup_len_small, cup_len_small * 0.956)
+    offset = float(offset_mm)
     lathes = (
         body,
         straight_lathe(cup_large, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
-        straight_lathe(cup_small, (0.0, length, 0.0), (0.0, -1.0, 0.0)),
+        straight_lathe(cup_small, (offset, length, 0.0), (0.0, -1.0, 0.0)),
     )
     mouths = (
         (np.zeros(3), np.array((0.0, -1.0, 0.0))),
-        (np.array((0.0, length, 0.0)), np.array((0.0, 1.0, 0.0))),
+        (np.array((offset, length, 0.0)), np.array((0.0, 1.0, 0.0))),
     )
     return SweptBody(lathes), mouths
 
@@ -201,10 +203,29 @@ def cleanout_lathes(
     return SweptBody(run.lathes + (stub, cover)), mouths
 
 
+def cap_lathes(od_mm, wall_mm, socket_od_mm, cup_len_mm, length_mm):
+    """KGK plug: capped body with a socket cup at the open mouth."""
+    od, wall = float(od_mm), float(wall_mm)
+    r_body, r_bore = od / 2, od / 2 - wall
+    r_collar = float(socket_od_mm) / 2
+    cup = socket_cup_profile(od, wall, socket_od_mm, float(cup_len_mm), float(cup_len_mm) * 0.956)
+    # solid plug behind the cup: radius from r_bore to r_body, closed at the back
+    plug = (
+        (r_bore, float(cup_len_mm)), (r_body, float(cup_len_mm)),
+        (r_body, float(length_mm)), (0.0, float(length_mm)), (0.0, float(cup_len_mm)),
+    )
+    lathes = (
+        straight_lathe(cup, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+        straight_lathe(plug, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+    )
+    mouths = ((np.zeros(3), np.array((0.0, -1.0, 0.0))),)
+    return SweptBody(lathes), mouths
+
+
 def elbow_lathes(
     angle_deg, od_mm, socket_od_mm=None, wall_mm=None,
     socket_straight_mm=None, spigot_straight_mm=None, radius_mm=None,
-    socket_len_mm=None, spigot_tip_mm=None,
+    socket_len_mm=None, spigot_tip_mm=None, socket_on_spigot=False,
 ):
     """Elbow with explicit dimensions (mm); None falls back to the measured
     Ostendorf KG 45 deg OD110 reference (220220z), scaled by OD.
@@ -250,15 +271,28 @@ def elbow_lathes(
     d1 = np.array((np.sin(angle), np.cos(angle), 0.0))
     arc_start = np.array((0.0, tangent_start, 0.0))
     arc_end = arc_start + radius * np.array((1 - np.cos(angle), np.sin(angle), 0.0))
-    lathes = (
-        straight_lathe(socket_profile, (0, 0, 0), d0),
-        arc_lathe(r_body, r_bore, arc_start, d0, d1, radius),
-        straight_lathe(spigot_profile, arc_end, d1),
-    )
-    mouths = (
-        (np.zeros(3), -d0),
-        (arc_end + d1 * tangent_end, -d1),
-    )
+    if socket_on_spigot:
+        # Manufacturer KGB: socket on the angled leg, plain spigot on the
+        # straight leg (the two ends mirrored along the main Y axis).
+        lathes = (
+            straight_lathe(spigot_profile, (0, 0, 0), d0),
+            arc_lathe(r_body, r_bore, arc_start, d0, d1, radius),
+            straight_lathe(socket_profile, arc_end + d1 * tangent_end, -d1),
+        )
+        mouths = (
+            (np.zeros(3), -d0),  # spigot tip
+            (arc_end + d1 * tangent_end, d1),  # socket mouth
+        )
+    else:
+        lathes = (
+            straight_lathe(socket_profile, (0, 0, 0), d0),
+            arc_lathe(r_body, r_bore, arc_start, d0, d1, radius),
+            straight_lathe(spigot_profile, arc_end, d1),
+        )
+        mouths = (
+            (np.zeros(3), -d0),  # socket mouth
+            (arc_end + d1 * tangent_end, d1),  # spigot tip
+        )
     return SweptBody(lathes), mouths
 
 
