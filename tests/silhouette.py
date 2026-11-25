@@ -5,6 +5,9 @@ rasterised from the triangle mesh directly (PIL-free); do not feed it OCCT
 display tessellation settings output — always pass meshes from tessellate().
 """
 
+import json
+from pathlib import Path
+
 import ifcopenshell.api.context
 import ifcopenshell.api.project
 import ifcopenshell.api.root
@@ -13,6 +16,8 @@ import ifcopenshell.geom
 import numpy as np
 
 from swept_geometrie import lathes_to_ifc
+
+ALIGN_JSON = Path(__file__).resolve().parents[1] / "data/ostendorf/align.json"
 
 
 def tessellate(body):
@@ -86,11 +91,31 @@ def pca_register(model, reference):
             if np.linalg.det(rotation) < 0:
                 continue
             aligned = (rv @ rotation, rf)
-            scores = iou(model, aligned, search_mm=0, pixels_per_mm=0.5)
+            # hrubé skóre s malým posunem: 87° odbočky mají PCA osy nestabilní
+            # (hlavní běh i odbočka mají podobní rozptyl), bez posunu se zavrhne
+            scores = iou(model, aligned, search_mm=6.0, pixels_per_mm=0.5)
             quality = sum(scores.values())
             if quality > best[0]:
                 best = (quality, rotation)
     return best[1]
+
+
+def register_cached(model, reference, article):
+    """Rotation aligning a reference, cached in align.json per article.
+
+    pca_register is deterministic but expensive (24 coarse IoU evals); the
+    reference meshes never change, so the rotation is computed once and
+    stored. Correctness is guarded by the IoU thresholds in the tests: a
+    stale entry simply fails them.
+    """
+    data = json.loads(ALIGN_JSON.read_text()) if ALIGN_JSON.exists() else {}
+    stored = data.get("register", {}).get(article)
+    if stored is not None:
+        return np.asarray(stored, float)
+    rotation = pca_register(model, reference)
+    data.setdefault("register", {})[article] = np.round(rotation, 8).tolist()
+    ALIGN_JSON.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+    return rotation
 
 
 def iou(model, reference, search_mm=10.0, pixels_per_mm=2.0):

@@ -21,10 +21,12 @@ ROOT = Path(__file__).parent
 # poloměr ohybu per DN; katalogové z1 ≈ R·tan(α/2) + 1 mm (viz docs/plán)
 BEND_RADIUS_MM = {110: 60.0, 125: 69.0, 160: 88.0}
 
-# Naměřeno ze STEP: (délka hrot→hnízdo, průsečík od hrotu, odbočka, úhel, DN, DN odbočky)
+# Naměřeno ze STEP (ústí z mouth_annuli): (délka hrot→hnízdo, průsečík od hrotu, odbočka, úhel, DN, DN odbočky)
+# 220300z: spigot −215,7 → hnízdo +61,3; čelo odbočky (129,1; 10,8) = 187,5 od vrcholu
+# 220400z: spigot −179,0 → hnízdo +61,5; čelo odbočky (118,7; −50,5) ⇒ vrchol 122,3 od hrotu, odbočka 118,9
 BRANCH_MEASURED = {
-    "220300": (215.7, 90.65, 187.3, 45, 110, 110),
-    "220400": (179.0, 132.15, 118.6, 87, 110, 110),
+    "220300": (277.0, 90.65, 187.3, 45, 110, 110),
+    "220400": (240.5, 122.3, 118.9, 87, 110, 110),
     "222320": (317.5, 86.0, 227.4, 45, 160, 110),
     "222420": (273.5, 143.7, 143.0, 87, 160, 110),
 }
@@ -166,13 +168,13 @@ def kg_items():
         ports = (
             Port("SOCKET", (0, 0, 0), (0, -1, 0), "SINK", sock["collar_diameter_mm"],
                  end_type="SOCKET", insertion_mm=t),
-            Port("SPIGOT", (offset, length - tb, 0), (0, 1, 0), "SOURCE", float(small),
-                 end_type="SPIGOT", insertion_mm=tb),
+            Port("SOCKET", (offset, length, 0), (0, 1, 0), "SINK", bsock["collar_diameter_mm"],
+                 end_type="SOCKET", insertion_mm=tb),
         )
         definition = _definition(
             f"KG redukce OD{dn}/{small}", row["article"], "TRANSITION",
             dn, 0, length, row["z1_mm"], 0, ports, branch_od=small,
-            status="estimated: kužel souosý, excentricita na hnízdu malého konce",
+            status="estimated: souosý kužel s rovným válcem, excentricita na malém hnízdu; oba konce hnízda",
         )
         body, _ = reducer_lathes(
             length, float(dn), float(small), sock["wall_mm"], bsock["wall_mm"],

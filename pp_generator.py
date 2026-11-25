@@ -108,25 +108,32 @@ def pp_items():
             continue
         angle = math.radians(row["angle_deg"])
         length = row["length_mm"]
-        junction_y = float(np.clip(row["z1_mm"], -length / 2 + 10, length / 2 - 10))
-        direction = np.array((math.sin(angle), math.cos(angle), 0.0))
+        # vrchol: z2 je vrchol -> horní hnízdo; kontrola proti z1 od spodního
+        # čela nasazené trubky (spodek + t); neshoda znamená odhad
         t, tb = SOCKET_T[main], SOCKET_T[branch]
+        vertex_from_socket = length / 2 - row["z2_mm"]
+        vertex_from_spigot = -length / 2 + row["z1_mm"] + t
+        estimated = abs(vertex_from_socket - vertex_from_spigot) > 8.0
+        vertex_y = (vertex_from_socket + vertex_from_spigot) / 2.0
+        direction = np.array((math.sin(angle), math.cos(angle), 0.0))
         ports = (
             Port("SPIGOT", (0, -length / 2 + t, 0), (0, -1, 0), "SOURCE", OD[main],
                  end_type="SPIGOT", insertion_mm=t),
             Port("SOCKET", (0, length / 2, 0), (0, 1, 0), "SINK", SOCKET_OD[main],
                  end_type="SOCKET", insertion_mm=t),
             Port("SOCKET BRANCH",
-                 (0, junction_y, 0) + row["z3_mm"] * direction, tuple(direction),
+                 (0, vertex_y, 0) + row["z3_mm"] * direction, tuple(direction),
                  "SINK", SOCKET_OD[branch], end_type="SOCKET", insertion_mm=tb),
         )
         body, _ = branch_lathes(
             length, OD[main], WALL[main], SOCKET_OD[main], t,
             OD[branch], WALL[branch], SOCKET_OD[branch], tb,
-            junction_y, row["z3_mm"], row["angle_deg"],
+            vertex_y, row["z3_mm"], row["angle_deg"],
         )
-        items.append((_definition(row, "JUNCTION", main, branch, ports,
-                     status="SweptSolid: L, z1, z3 a úhel z příručky; průnik těl bez booleanu"), body))
+        status = "SweptSolid: L, z2, z3 a úhel z příručky; průnik těl bez booleanu"
+        if estimated:
+            status = "estimated: vrchol z průměru z1/t a z2, řádky nesouhlasí o více než 8 mm"
+        items.append((_definition(row, "JUNCTION", main, branch, ports, status=status), body))
 
     for row in TABLE["reducers"]:
         large, small = row["large_dn_od"], row["small_dn_od"]
@@ -136,15 +143,16 @@ def pp_items():
         ports = (
             Port("SOCKET", (0, 0, 0), (0, -1, 0), "SINK", row["large_socket_od_mm"],
                  end_type="SOCKET", insertion_mm=t),
-            Port("SPIGOT", (0, row["length_mm"] - tb, 0), (0, 1, 0), "SOURCE", OD[small],
-                 end_type="SPIGOT", insertion_mm=tb),
+            Port("SOCKET", (0, row["length_mm"], 0), (0, 1, 0), "SINK", row["small_socket_od_mm"],
+                 end_type="SOCKET", insertion_mm=tb),
         )
         body, _ = reducer_lathes(
             row["length_mm"], OD[large], OD[small], WALL[large], WALL[small],
             row["large_socket_od_mm"], row["small_socket_od_mm"], t, tb,
+            straight_large_mm=row["z1_mm"],
         )
         items.append((_definition(row, "TRANSITION", large, small, ports,
-                     status="SweptSolid kužel z katalogu L a Dmax; z1 jen vlastnost"), body))
+                     status="SweptSolid kužel z katalogu L a Dmax; rovný válec z1 a malé hnízdo estimated"), body))
 
     for row in TABLE["cleanouts"]:
         dn = row["dn_od"]

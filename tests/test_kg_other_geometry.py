@@ -6,17 +6,19 @@ import numpy as np
 import pytest
 
 from swept_geometrie import branch_lathes, cleanout_lathes, reducer_lathes
-from tests.silhouette import iou, pca_register, tessellate
+from tests.silhouette import iou, register_cached, tessellate
 from tools.measure_reference import load_mesh
 
 ROOT = Path(__file__).parents[1]
 TABLE = __import__("kg_generator").load_table()
 
-# ze STEP naměřené hodnoty (příloha plánu "KG: naměřeno ze STEP"):
-# (celá délka, průsečík od hrotu, délka odbočky, úhel, DN hlavní, DN odbočky)
+# ze STEP naměřené hodnoty (ústí z mouth_annuli, příloha plánu "KG: naměřeno ze STEP"):
+# (celá délka hrot→hnízdo, průsečík od hrotu, délka odbočky, úhel, DN hlavní, DN odbočky)
+# 220300z: spigot −215,7 → hnízdo +61,3; vrchol 90,65 od hrotu; čelo odbočky (129,1; 10,8) = 187,5 od vrcholu
+# 220400z: spigot −179,0 → hnízdo +61,5; čelo odbočky (118,7; −50,5) ⇒ vrchol 122,3 od hrotu, odbočka 118,9
 BRANCH_MEASURED = {
-    "220300z": (215.7, 90.65, 187.3, 45, 110, 110),
-    "220400z": (179.0, 132.15, 118.6, 87, 110, 110),
+    "220300z": (277.0, 90.65, 187.3, 45, 110, 110),
+    "220400z": (240.5, 122.3, 118.9, 87, 110, 110),
     "222320z": (317.5, 86.0, 227.4, 45, 160, 110),
     "222420z": (273.5, 143.7, 143.0, 87, 160, 110),
 }
@@ -25,7 +27,7 @@ BRANCH_MEASURED = {
 def _scores(body, article):
     model = tessellate(body)
     vertices, faces = load_mesh(ROOT / f"data/ostendorf/{article}.json")
-    rotation = pca_register(model, (vertices, faces))
+    rotation = register_cached(model, (vertices, faces), article)
     return iou(model, (vertices @ rotation, faces))
 
 
@@ -42,9 +44,12 @@ def test_kg_branch_matches_step_reference(article):
         vertex - length / 2, branch_len, angle,
     )
     scores = _scores(body, article)
-    # hrubá kontrola: bez booleanů je průnik těl u odbočky jen překryv,
-    # hnízda jsou aproximovaná; X/Z jsou nejcitlivější na délky a úhel
-    assert min(scores.values()) >= 0.55 and max(scores.values()) >= 0.75, (article, scores)
+    # pohled X (kolmo na rovinu ohybu) a Z musejí sedět na tvaru; Y je podél
+    # hlavní osy, tam brzdí aproximovaná hnízda a překryv těl bez booleanů.
+    # Výjimka 220300z: Z pohled, šikmé čelo odbočky bez zkosení.
+    assert scores["X"] >= 0.90, (article, scores)
+    assert scores["Z"] >= (0.70 if article == "220300z" else 0.85), (article, scores)
+    assert scores["Y"] >= 0.55, (article, scores)
 
 
 def test_kg_eccentric_reducer_matches_step_reference():

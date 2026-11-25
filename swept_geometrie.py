@@ -130,18 +130,27 @@ def socket_run_lathes(length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm, socke
 def reducer_lathes(
     length_mm, od_large, od_small, wall_large, wall_small,
     socket_od_large, socket_od_small, cup_len_large, cup_len_small,
-    offset_mm=0.0,
+    offset_mm=0.0, straight_large_mm=0.0,
 ):
-    """Concentric reducer: conical wall tube with an overlapping socket cup at each end."""
+    """Reducer along +Y: straight socket cylinder, then a conical wall tube.
+
+    Socket cup at each end; `offset_mm` shifts the small end sideways
+    (eccentric reducer), `straight_large_mm` is the straight cylinder length
+    at the large socket before the cone starts.
+    """
     length = float(length_mm)
-    body = Lathe(
-        (
-            (float(od_large) / 2 - float(wall_large), 0.0), (float(od_large) / 2, 0.0),
-            (float(od_small) / 2, length), (float(od_small) / 2 - float(wall_small), length),
-        ),
-        (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0),
-        (0.0, 0.0, 0.0), (0.0, 1.0, 0.0), 2.0 * np.pi,
+    straight = min(float(straight_large_mm), length - 5.0)
+    r_large_body = float(od_large) / 2
+    r_small_body = float(od_small) / 2
+    r_bore_large = r_large_body - float(wall_large)
+    cone_profile = (
+        (r_bore_large, 0.0), (r_large_body, 0.0),
+        (r_large_body, straight),
+        (r_small_body, length),
+        (r_small_body - float(wall_small), length),
+        (r_bore_large, straight),
     )
+    body = straight_lathe(cone_profile, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0))
     cup_large = socket_cup_profile(od_large, wall_large, socket_od_large, cup_len_large, cup_len_large * 0.956)
     cup_small = socket_cup_profile(od_small, wall_small, socket_od_small, cup_len_small, cup_len_small * 0.956)
     offset = float(offset_mm)
@@ -160,22 +169,25 @@ def reducer_lathes(
 def branch_lathes(
     length_main_mm, od_main, wall_main, socket_od_main, cup_len_main,
     od_branch, wall_branch, socket_od_branch, cup_len_branch,
-    z1_mm, z3_mm, angle_deg,
+    vertex_y_mm, z3_mm, angle_deg,
 ):
     """Junction as overlapping lathes: socketed main run plus an angled branch arm.
 
-    The branch tube starts on the main axis and penetrates the main wall; the
+    `vertex_y_mm` is the branch-axis intersection with the main axis, in the
+    centred main-run coordinates (catalogue z2 from the socket end). The main
+    run has a socket cup only at its +Y end (the other end is a spigot). The
+    branch tube starts on the main axis and penetrates the main wall; the
     junction is a solid overlap, no boolean.
     """
     angle = np.deg2rad(float(angle_deg))
     main, mouths = socket_run_lathes(
         length_main_mm, od_main, wall_main, socket_od_main, cup_len_main,
-        start_mm=-float(length_main_mm) / 2,
+        sockets="end", start_mm=-float(length_main_mm) / 2,
     )
-    junction = np.array((0.0, float(z1_mm), 0.0))
+    junction = np.array((0.0, float(vertex_y_mm), 0.0))
     direction = np.array((np.sin(angle), np.cos(angle), 0.0))
-    branch_len = float(z3_mm) + cup_len_branch * 0.6  # reach past the socket mouth plane
-    branch = tube_lathe(od_branch, wall_branch, branch_len, start=junction, direction=direction)
+    # trubka končí přesně v ústí (z3); hnízdo ji překrývá zevnitř
+    branch = tube_lathe(od_branch, wall_branch, float(z3_mm), start=junction, direction=direction)
     cup = socket_cup_profile(od_branch, wall_branch, socket_od_branch, cup_len_branch, cup_len_branch * 0.956)
     branch_cup = straight_lathe(cup, junction + float(z3_mm) * direction, -direction)
     lathes = main.lathes + (branch, branch_cup)
@@ -187,19 +199,18 @@ def cleanout_lathes(
     length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm,
     z1_mm, cover_diameter_mm, cover_thickness_mm=None,
 ):
-    """Vertical access piece: socketed run plus a side opening with a flat cover."""
+    """Access piece along +Y: socket cup at the y=0 mouth, plain spigot end,
+    plus a side opening at `z1_mm` with a flat cover."""
     run, mouths = socket_run_lathes(
-        length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm, direction=(0.0, 0.0, 1.0),
+        length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm,
+        sockets="start", start_mm=0.0, direction=(0.0, 1.0, 0.0),
     )
     side_od = float(cover_diameter_mm)
-    stub = tube_lathe(side_od, float(wall_mm), float(od_mm), start=(0.0, 0.0, float(z1_mm)), direction=(1.0, 0.0, 0.0))
+    stub = tube_lathe(side_od, float(wall_mm), float(od_mm), start=(0.0, float(z1_mm), 0.0), direction=(1.0, 0.0, 0.0))
     thickness = 0.35 * side_od if cover_thickness_mm is None else float(cover_thickness_mm)
     r_cover = side_od / 2
-    cover = Lathe(
-        ((0.0, 0.0), (r_cover, 0.0), (r_cover, thickness), (0.0, thickness)),
-        (float(od_mm), 0.0, float(z1_mm)), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0),
-        (0.0, 0.0, 0.0), (0.0, 1.0, 0.0), 2.0 * np.pi,
-    )
+    cover_profile = ((0.0, 0.0), (r_cover, 0.0), (r_cover, thickness), (0.0, thickness))
+    cover = straight_lathe(cover_profile, (float(od_mm), float(z1_mm), 0.0), (-1.0, 0.0, 0.0))
     return SweptBody(run.lathes + (stub, cover)), mouths
 
 
@@ -239,11 +250,15 @@ def elbow_lathes(
     if not 0 < angle < np.pi or od <= 0:
         raise ValueError("elbow needs a positive OD and an angle between 0 and 180 degrees")
     scale = od / 110.4
-    radius = 56.5 * scale if radius_mm is None else float(radius_mm)
-    tangent_start = 65.0 * scale if socket_straight_mm is None else float(socket_straight_mm)
-    tangent_end = 64.0 * scale if spigot_straight_mm is None else float(spigot_straight_mm)
     wall = 3.3 * scale if wall_mm is None else float(wall_mm)
     r_body, r_bore = od / 2, od / 2 - wall
+    radius = 56.5 * scale if radius_mm is None else float(radius_mm)
+    # jádro (OCCT i Revit) tiše zahodí oblouk s příliš malým vnitřním poloměrem
+    # (PP DN125: LSQ R=60,7 při r_bore=59,65); per-lathe měření dává limit
+    # mezi 2,5 a 4 mm vůči r_bore
+    radius = max(radius, r_bore + 4.0)
+    tangent_start = 65.0 * scale if socket_straight_mm is None else float(socket_straight_mm)
+    tangent_end = 64.0 * scale if spigot_straight_mm is None else float(spigot_straight_mm)
     socket_len = 57.0 * scale if socket_len_mm is None else float(socket_len_mm)
     tip_len = 30.0 * scale if spigot_tip_mm is None else float(spigot_tip_mm)
     r_collar = (126.9 * scale if socket_od_mm is None else float(socket_od_mm)) / 2

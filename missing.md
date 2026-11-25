@@ -22,12 +22,13 @@ Checklist věcí, které knihovna zatím **neřeší**. Odškrtnuté = doplněno
 
 ## Stále otevřené
 
-- [ ] KG odbočky: katalogní `L` nesedí na STEP (např. 160/110: 242 vs 317,5 mm); 4 články jsou `measured`, 8 `estimated` škálováním
+- [x] KG odbočky: katalogní `L` nesedí na STEP (např. 110/110 45°: 215,7 vs 277,0 mm; 160/110: 242 vs 317,5 mm) — 4 články jsou `measured` ze STEP se správnými délkami hrot→hnízdo, 8 `estimated` škálováním
 - [ ] Těsnicí prstenec/drážka hnízda není součástí těla; jen aproximovaný profil
 - [ ] KG DN125 hnízdo (límec, zóna) je jen katalogové, bez STEP měření
 - [ ] Barak pilot počítá u DN160 povytažení 81 − 10 = 71 mm, katalogový `t` = 84; funkční rozdíl ověřit při spojení v projektu
 - [ ] Booleany na křižovatkách odboček: tělě se překrývají, bez vnitřního vyříznutí
-- [ ] IoU odboček/redukce/čistícího kusu má rodinové prahy (min 0,55/0,45/0,25), ne 0,85; je to hrubá kontrola, ne přesnost výrobku
+- [x] IoU odboček: kóty opraveny ze STEP; prahy zvýšeny na X ≥ 0,90, Z ≥ 0,85 (výjimka 220300z ≥ 0,70, šikmé čelo bez zkosení), Y ≥ 0,55 (pohled podél osy brzdí aproximovaná hnízda). Redukce/čistící kus zůstávají na rodinových prazích
+- [x] Registrace IoU testů se počítá jednou a ukládá do `data/ostendorf/align.json` (`register_cached`); celá sada z ~10,5 min na ~4 min. Zastaralá registraci chytí prahy IoU
 - [x] Funkční zkouška v Bonsai: odbočka KG 160/110 — trubka OD110 (`tools/check_connection.py` → `out/connection-check.ifc` načten v Blenderu/Bonsai), porty čtené zpět z IFC, osy opačné, hrot 66 mm uvnitř hnízda; PP mřížka zobrazena
 - [ ] PP stará řada (2021) má „oblouk 87,5°" bez hnízda — ponecháno mimo knihovnu
 
