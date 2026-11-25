@@ -149,10 +149,11 @@ def pp_items():
         body, _ = reducer_lathes(
             row["length_mm"], OD[large], OD[small], WALL[large], WALL[small],
             row["large_socket_od_mm"], row["small_socket_od_mm"], t, tb,
-            straight_large_mm=row["z1_mm"],
+            # Z1 se měří od malého ústí do konce kuželu; velké hnízdo zabírá L - Z1
+            straight_large_mm=row["length_mm"] - row["z1_mm"],
         )
         items.append((_definition(row, "TRANSITION", large, small, ports,
-                     status="SweptSolid kužel z katalogu L a Dmax; rovný válec z1 a malé hnízdo estimated"), body))
+                     status="SweptSolid kužel z katalogu L a Z1 (od malého ústí); rovný válec L-Z1 a malé hnízdo estimated"), body))
 
     for row in TABLE["cleanouts"]:
         dn = row["dn_od"]
@@ -167,7 +168,7 @@ def pp_items():
         )
         body, _ = cleanout_lathes(
             row["length_mm"], row["od_mm"], WALL[dn], row["socket_od_mm"], t,
-            row["z1_mm"], row["service_diameter_mm"],
+            row["z1_mm"], row["service_diameter_mm"], row["service_reach_mm"],
         )
         items.append((_definition(row, "USERDEFINED", dn, ports=ports,
                      status=f"SweptSolid z katalogu; {row['service_dimensions_status']}"), body))

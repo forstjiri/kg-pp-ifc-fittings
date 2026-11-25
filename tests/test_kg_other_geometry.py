@@ -64,7 +64,10 @@ def test_kg_eccentric_reducer_matches_step_reference():
 
 
 def test_kg_cleanout_matches_step_reference():
-    body, _ = cleanout_lathes(238.5, 110, 3.2, 127, 66, 143.0, 71.5)
+    body, _ = cleanout_lathes(
+        238.5, 110, 3.2, 127, 66, 120.0, 111.5, 86.5,
+        cover_thickness_mm=17.0, neck_diameter_mm=98.0,
+    )
     scores = _scores(body, "175600z")
-    # víčko a boční hrdlo jsou odhad (katalog nemá rozměry), tělo sedí
-    assert min(scores.values()) >= 0.25 and max(scores.values()) >= 0.75, scores
+    # víčko a krk ze STEP, délka článku z katalogu (jiný kus než STEP)
+    assert min(scores.values()) >= 0.45 and max(scores.values()) >= 0.85, scores

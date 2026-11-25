@@ -213,20 +213,28 @@ def branch_lathes(
 
 def cleanout_lathes(
     length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm,
-    z1_mm, cover_diameter_mm, cover_thickness_mm=None,
+    z1_mm, cover_diameter_mm, cover_reach_mm,
+    cover_thickness_mm=None, neck_diameter_mm=None,
 ):
     """Access piece along +Y: socket cup at the y=0 mouth, plain spigot end,
-    plus a side opening at `z1_mm` with a flat cover."""
+    plus a side opening at `z1_mm` with a neck stub and a cap.
+
+    `cover_reach_mm` is the cap face distance from the run axis. Measured on
+    STEP 175600z: neck OD 98 sticking out ~14 mm, cap OD 111, cap ~17 mm thick,
+    cap face 86.5 mm off the axis, cap axis 120 from the spigot end.
+    """
     run, mouths = socket_run_lathes(
         length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm,
         sockets="start", start_mm=0.0, direction=(0.0, 1.0, 0.0),
     )
     side_od = float(cover_diameter_mm)
-    stub = tube_lathe(side_od, float(wall_mm), float(od_mm), start=(0.0, float(z1_mm), 0.0), direction=(1.0, 0.0, 0.0))
-    thickness = 0.35 * side_od if cover_thickness_mm is None else float(cover_thickness_mm)
+    reach = float(cover_reach_mm)
+    thickness = 0.15 * side_od if cover_thickness_mm is None else float(cover_thickness_mm)
+    neck_d = side_od - 13.0 if neck_diameter_mm is None else float(neck_diameter_mm)
+    stub = tube_lathe(neck_d, float(wall_mm), reach - thickness, start=(0.0, float(z1_mm), 0.0), direction=(1.0, 0.0, 0.0))
     r_cover = side_od / 2
     cover_profile = ((0.0, 0.0), (r_cover, 0.0), (r_cover, thickness), (0.0, thickness))
-    cover = straight_lathe(cover_profile, (float(od_mm), float(z1_mm), 0.0), (-1.0, 0.0, 0.0))
+    cover = straight_lathe(cover_profile, (reach, float(z1_mm), 0.0), (-1.0, 0.0, 0.0))
     return SweptBody(run.lathes + (stub, cover)), mouths
 
 

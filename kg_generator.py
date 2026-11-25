@@ -164,7 +164,8 @@ def kg_items():
         sock, bsock = _socket(table, dn), _socket(table, small)
         length = 176.5 if row["article"] == "222700" else row["L_mm"] * 1.5
         t, tb = sock["insertion_depth_t_mm"], bsock["insertion_depth_t_mm"]
-        offset = row["z1_mm"]
+        # katalogové z1 neodpovídá STEP 222700z (23,1 mm); škálujeme měřenou hodnotu DN/160
+        offset = 23.1 * dn / 160.0
         ports = (
             Port("SOCKET", (0, 0, 0), (0, -1, 0), "SINK", sock["collar_diameter_mm"],
                  end_type="SOCKET", insertion_mm=t),
@@ -173,8 +174,8 @@ def kg_items():
         )
         definition = _definition(
             f"KG redukce OD{dn}/{small}", row["article"], "TRANSITION",
-            dn, 0, length, row["z1_mm"], 0, ports, branch_od=small,
-            status="estimated: souosý kužel s rovným válcem, excentricita na malém hnízdu; oba konce hnízda; tvar hrdla ze STEP 222700z (plný boss OD194×88, kužel 29 mm)",
+            dn, 0, length, offset, 0, ports, branch_od=small,
+            status="estimated: souosý kužel s rovným válcem, excentricita na malém hnízdu škálovaná ze STEP 222700z (23,1 mm × DN/160); oba konce hnízda; tvar hrdla ze STEP (plný boss OD194×88, kužel 29 mm)",
         )
         body, _ = reducer_lathes(
             length, float(dn), float(small), sock["wall_mm"], bsock["wall_mm"],
@@ -206,6 +207,15 @@ def kg_items():
         sock = _socket(table, dn)
         t = sock["insertion_depth_t_mm"]
         length = row["length_mm"]
+        # víčko a krk změřeny na STEP 175600z (DN110), ostatní DN škálovány
+        scale = dn / 110.0
+        z1, cover_d, cover_reach = 120.0 * scale, 111.5 * scale, 86.5 * scale
+        cover_t, neck_d = 17.0 * scale, 98.0 * scale
+        status = (
+            "SweptSolid: víčko a krk ze STEP 175600z, délka z katalogu"
+            if row["article"] == "220600"
+            else "estimated: víčko a krk ze STEP 175600z škálované DN/110, délka z katalogu"
+        )
         ports = (
             Port("SOCKET", (0, 0, 0), (0, -1, 0), "SINK", sock["collar_diameter_mm"],
                  end_type="SOCKET", insertion_mm=t),
@@ -214,12 +224,11 @@ def kg_items():
         )
         definition = _definition(
             f"KG čistící kus OD{dn}", row["article"], "USERDEFINED", dn, 0, length,
-            length * 0.6, 0, ports,
-            status="estimated: boční víčko a hrdlo z katalogu nejsou rozměrována",
+            z1, 0, ports, status=status,
         )
         body, _ = cleanout_lathes(
             float(length), float(dn), sock["wall_mm"], sock["collar_diameter_mm"], t,
-            length * 0.6, float(dn) * 0.65,
+            z1, cover_d, cover_reach, cover_thickness_mm=cover_t, neck_diameter_mm=neck_d,
         )
         items.append((definition, body))
 

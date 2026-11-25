@@ -11,7 +11,7 @@ def test_current_rows_have_catalogue_metadata_and_nominal_dn():
     for family in ("elbows", "simple_branches", "reducers", "cleanouts", "caps"):
         for row in DATA[family]:
             assert row["status"] == "catalogue"
-            assert row["source"].startswith("handbook 2026, str. ")
+            assert row["source"].startswith(("handbook 2026, str. ", "brochure str. "))
             assert row["series"] == "current"
             assert "DN" in row
     assert all("branch_DN" in row for row in DATA["simple_branches"])
@@ -72,6 +72,9 @@ def test_reducers_cleanouts_and_caps():
         "M3-R150/100",
     )
     assert {row["dn_od"] for row in DATA["cleanouts"]} == {50, 75, 90, 110, 125, 160}
+    re110 = next(row for row in DATA["cleanouts"] if row["dn_od"] == 110)
+    assert (re110["length_mm"], re110["z1_mm"], re110["service_diameter_mm"],
+            re110["service_reach_mm"]) == (192, 126, 64, 80)
     assert len(DATA["caps"]) == 8
     assert [(row["dn_od"], row["length_mm"]) for row in DATA["caps"]] == [
         (32, 33),
