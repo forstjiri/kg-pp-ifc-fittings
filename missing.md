@@ -28,6 +28,10 @@ Checklist věcí, které knihovna zatím **neřeší**. Odškrtnuté = doplněno
 - [ ] Barak pilot počítá u DN160 povytažení 81 − 10 = 71 mm, katalogový `t` = 84; funkční rozdíl ověřit při spojení v projektu
 - [ ] Booleany na křižovatkách odboček: tělě se překrývají, bez vnitřního vyříznutí
 - [x] IoU odboček: kóty opraveny ze STEP; prahy zvýšeny na X ≥ 0,90, Z ≥ 0,85 (výjimka 220300z ≥ 0,70, šikmé čelo bez zkosení), Y ≥ 0,55 (pohled podél osy brzdí aproximovaná hnízda). Redukce/čistící kus zůstávají na rodinových prazích
+- [x] Vyšetřeno katalogové `z1` redukcí KG: neodpovídá STEP (34 vs 23,1 mm) ani logika rovných límců či dna → posun škálován `23,1 × DN/160`
+- [x] Čistící kus: krk + víčko ze STEP 175600z (KG), PP z katalogu M3+RE (`Z1`, `Z2`, `a`); IoU 0,91/0,51/0,70
+- [x] PP redukce: `Z1` od malého ústí do konce kuželu, rovný válec `L − Z1`
+- [ ] Souosé kusy na jeden uzavřený profil: čistící kus ani redukce nejsou souosé (boční hrdlo, excentricita), jediný kandidát je zátka a tam je zisk jen čistota modelu — odloženo
 - [x] Registrace IoU testů se počítá jednou a ukládá do `data/ostendorf/align.json` (`register_cached`); celá sada z ~10,5 min na ~4 min. Zastaralá registraci chytí prahy IoU
 - [x] Funkční zkouška v Bonsai: odbočka KG 160/110 — trubka OD110 (`tools/check_connection.py` → `out/connection-check.ifc` načten v Blenderu/Bonsai), porty čtené zpět z IFC, osy opačné, hrot 66 mm uvnitř hnízda; PP mřížka zobrazena
 - [ ] PP stará řada (2021) má „oblouk 87,5°" bez hnízda — ponecháno mimo knihovnu
