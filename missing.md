@@ -28,7 +28,7 @@ Checklist věcí, které knihovna zatím **neřeší**. Odškrtnuté = doplněno
 - [ ] Barak pilot počítá u DN160 povytažení 81 − 10 = 71 mm, katalogový `t` = 84; funkční rozdíl ověřit při spojení v projektu
 - [ ] Booleany na křižovatkách odboček: tělě se překrývají, bez vnitřního vyříznutí
 - [ ] IoU odboček/redukce/čistícího kusu má rodinové prahy (min 0,55/0,45/0,25), ne 0,85; je to hrubá kontrola, ne přesnost výrobku
-- [ ] Funkční zkouška v Bonsai: odbočka KG 160/110 — trubka OD110 — koleno 45° OD110, porty po importu a zasunutí
+- [x] Funkční zkouška v Bonsai: odbočka KG 160/110 — trubka OD110 (`tools/check_connection.py` → `out/connection-check.ifc` načten v Blenderu/Bonsai), porty čtené zpět z IFC, osy opačné, hrot 66 mm uvnitř hnízda; PP mřížka zobrazena
 - [ ] PP stará řada (2021) má „oblouk 87,5°" bez hnízda — ponecháno mimo knihovnu
 
 ## Nástroje a validace
