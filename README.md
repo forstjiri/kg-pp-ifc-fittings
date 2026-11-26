@@ -1,6 +1,15 @@
 # Parametric IFC fittings
 
+> **Status: draft / nástřel.** This is an experimental collection of parametric
+> IFC4 libraries of KG and PP fittings and pipe profiles. The API, data structure
+> and geometry may change without backward compatibility. It is intended for
+> coordination, experiments and validation, not for manufacturing. Catalogue
+> dimensions and STEP references come from manufacturer publications (Ostendorf,
+> Pipelife); their redistribution terms have not been verified. Source code is
+> licensed under the [MIT license](LICENSE); the data files are not relicensed.
+
 ```sh
+python -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python generate_all.py            # both libraries
 .venv/bin/python generate_all.py --preview   # + sample grid
 .venv/bin/python -m pytest tests -q
