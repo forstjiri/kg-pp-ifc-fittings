@@ -167,21 +167,23 @@ def kg_items():
         # katalogové z1 neodpovídá STEP 222700z (23,1 mm); škálujeme měřenou hodnotu DN/160
         offset = 23.1 * dn / 160.0
         ports = (
-            Port("SOCKET", (0, 0, 0), (0, -1, 0), "SINK", sock["collar_diameter_mm"],
-                 end_type="SOCKET", insertion_mm=t),
-            Port("SOCKET", (offset, length, 0), (0, 1, 0), "SINK", bsock["collar_diameter_mm"],
+            # dole holý konec (žádná samice, STEP 222700z: jen prstenec OD156,5/ID152,2)
+            Port("SPIGOT", (-offset, t, 0), (0, -1, 0), "SOURCE", float(dn),
+                 end_type="SPIGOT", insertion_mm=t),
+            Port("SOCKET", (0, length, 0), (0, 1, 0), "SINK", bsock["collar_diameter_mm"],
                  end_type="SOCKET", insertion_mm=tb),
         )
         definition = _definition(
             f"KG redukce OD{dn}/{small}", row["article"], "TRANSITION",
             dn, 0, length, offset, 0, ports, branch_od=small,
-            status="estimated: souosý kužel s rovným válcem, excentricita na malém hnízdu škálovaná ze STEP 222700z (23,1 mm × DN/160); oba konce hnízda; tvar hrdla ze STEP (plný boss OD194×88, kužel 29 mm)",
+            status="estimated: dole široký holý konec, kužel s excentricitou škálovanou ze STEP 222700z (23,1 mm × DN/160), samice jen nahoře; tvar hrdla ze STEP (boss OD194×88, kužel 29 mm)",
         )
         body, _ = reducer_lathes(
             length, float(dn), float(small), sock["wall_mm"], bsock["wall_mm"],
             float(sock["collar_diameter_mm"]) + 12.0 * dn / 160.0, bsock["collar_diameter_mm"],
             t, tb, offset_mm=offset,
             straight_large_mm=88.0 * dn / 160.0, cone_len_mm=29.0 * dn / 160.0,
+            plain_large_end=True,
         )
         items.append((definition, body))
 

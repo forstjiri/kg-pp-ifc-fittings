@@ -33,10 +33,10 @@ def test_kg_batch_is_pure_swept_solid_and_complete(tmp_path):
     )
     assert not file.by_type("IfcTriangulatedFaceSet")
     assert all(
-        item.is_a("IfcRevolvedAreaSolid")
+        item.is_a("IfcRevolvedAreaSolid") or item.is_a("IfcExtrudedAreaSolidTapered")
         for representation in file.by_type("IfcShapeRepresentation")
         for item in representation.Items
-        if item.is_a("IfcRevolvedAreaSolid") or item.is_a("IfcTriangulatedFaceSet")
+        if item.is_a("IfcRevolvedAreaSolid") or item.is_a("IfcExtrudedAreaSolidTapered")
     )
 
 

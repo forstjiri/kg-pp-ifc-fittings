@@ -68,6 +68,40 @@ def _mask(points, triangles, low, high, pixels_per_mm=2.0):
     return mask
 
 
+def canonical_two_mouths(vertices, faces):
+    """Deterministická kanonizace dvústí (redukce, bez registrace).
+
+    Osa podle čela většího ústí, směr k malému ústí, excentricita do +X;
+    větší ústí v počátku. Vrací nové vrcholy. PCA registrace se u excentrické
+    redukce chytá špatných permutací, proto ji testy redukce nepoužívají.
+    """
+    from tools.measure_reference import mouth_annuli
+    mouths = mouth_annuli(vertices, faces)
+    # spojení rozpůlených ústí: stejná osa a blízké středy
+    merged = []
+    for m in mouths:
+        for g in merged:
+            if float(np.dot(m["axis_in"], g["axis_in"])) > 0.99 and np.linalg.norm(m["center"] - g["center"]) < 120.0:
+                n = len(g["_members"])
+                g["center"] = (g["center"] * n + m["center"]) / (n + 1)
+                g["outer_od"] = max(g["outer_od"], m["outer_od"])
+                g["_members"].append(m)
+                break
+        else:
+            merged.append({**m, "_members": [m]})
+    if len(merged) != 2:
+        raise ValueError(f"očekávány 2 ústí, nalezeno {len(merged)}")
+    wide, narrow = sorted(merged, key=lambda m: -m["outer_od"])
+    y = wide["axis_in"] if np.dot(wide["axis_in"], narrow["center"] - wide["center"]) > 0 else -wide["axis_in"]
+    line = narrow["center"] - wide["center"]
+    x = line - np.dot(line, y) * y
+    if np.linalg.norm(x) < 1e-6:
+        x = np.array((1.0, 0.0, 0.0)) - y * y[0]
+    x /= np.linalg.norm(x)
+    z = np.cross(x, y)
+    return (vertices - wide["center"]) @ np.column_stack((x, y, z))
+
+
 def pca_register(model, reference):
     """Rotation aligning a STEP reference mesh to a model mesh.
 

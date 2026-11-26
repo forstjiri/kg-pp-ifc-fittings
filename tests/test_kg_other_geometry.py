@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from swept_geometrie import branch_lathes, cleanout_lathes, reducer_lathes
-from tests.silhouette import iou, register_cached, tessellate
+from tests.silhouette import canonical_two_mouths, iou, register_cached, tessellate
 from tools.measure_reference import load_mesh
 
 ROOT = Path(__file__).parents[1]
@@ -55,12 +55,19 @@ def test_kg_branch_matches_step_reference(article):
 def test_kg_eccentric_reducer_matches_step_reference():
     body, mouths = reducer_lathes(
         176.5, 160, 110, 4.0, 3.2, 194, 127, 84, 66, offset_mm=23.1,
-        straight_large_mm=88, cone_len_mm=29,
+        straight_large_mm=88, cone_len_mm=29, plain_large_end=True,
     )
-    scores = _scores(body, "222700z")
-    # kužel je souosý, excentricita je jen na hnízdu malého konce; Y pohled
-    # brzdí neviditelné bory
-    assert min(scores.values()) >= 0.50 and max(scores.values()) >= 0.70, scores
+    model_vertices, model_faces = tessellate(body)
+    vertices, faces = load_mesh(ROOT / "data/ostendorf/222700z.json")
+    # kanonizace přes ústí: PCA registrace se u excentrické redukce chytá
+    # špatných permutací. Model je postavený přímo v kanonickém rámu
+    # (široký konec v počátku, osa +Y, excentricita do +X) — jen posunout.
+    model_c = model_vertices - mouths[0][0]
+    ref_c = canonical_two_mouths(vertices, faces)
+    scores = iou((model_c, model_faces), (ref_c, faces))
+    # kužel je aproximován revolucí kolem nakloněné osy (skutečný excentrický
+    # kužel má rovnoběžné osy), Y brzdí neviditelné bory
+    assert min(scores.values()) >= 0.78 and max(scores.values()) >= 0.82, scores
 
 
 def test_kg_cleanout_matches_step_reference():

@@ -29,6 +29,21 @@ class SweptBody:
     lathes: tuple
 
 
+@dataclass(frozen=True)
+class Taper:
+    """IfcExtrudedAreaSolidTapered: one lofted solid between two hollow circles.
+
+    The two circles may have different radii *and centres*, which is exactly
+    what an eccentric reducer cone needs — no steps, no tilt, pure SweptSolid.
+    `bottom`/`top` are (outer_radius, wall_thickness, x_offset) in the profile
+    frame; `location` is the world centre of the bottom circle.
+    """
+    bottom: tuple
+    top: tuple
+    location: tuple
+    depth: float
+
+
 def _unit(vector):
     vector = np.asarray(vector, float)
     return vector / np.linalg.norm(vector)
@@ -140,6 +155,7 @@ def reducer_lathes(
     length_mm, od_large, od_small, wall_large, wall_small,
     socket_od_large, socket_od_small, cup_len_large, cup_len_small,
     offset_mm=0.0, straight_large_mm=0.0, cone_len_mm=None,
+    plain_large_end=False,
 ):
     """Reducer along +Y: socket boss, cone, then straight small socket section.
 
@@ -148,6 +164,12 @@ def reducer_lathes(
     at the large socket before the cone starts; `cone_len_mm` the cone length
     (default: cone runs to the small mouth). Measured on STEP 222700z: boss
     OD194 x 88 mm, cone 29 mm, then straight OD110.
+
+    With `plain_large_end` the large end is a plain DN-size barrel (OD
+    `od_large`, bore `od_large - 2*wall_large`), offset `-offset_mm` sideways;
+    both ends are vertical and only the short cone shifts sideways. The only
+    female socket is at the small end (STEP 222700z: bottom mouth OD160/ID152.2
+    centred at x=-23.1, small end centred at x=0).
     """
     length = float(length_mm)
     straight = min(float(straight_large_mm), length - 5.0)
@@ -156,6 +178,8 @@ def reducer_lathes(
     r_large_body = float(od_large) / 2
     r_small_body = float(od_small) / 2
     r_bore_large = r_large_body - float(wall_large)
+    # profil je pro oba režimy stejný: rovný válec OD od_large, pak kužel, malý konec.
+    # (STEP 222700z: široký díl je holý konec DN160, OD 160 / ID 152.2, posunutý -23.1)
     cone_profile = (
         (r_bore_large, 0.0), (r_large_body, 0.0),
         (r_large_body, straight),
@@ -164,15 +188,43 @@ def reducer_lathes(
         (r_small_body - float(wall_small), length),
         (r_bore_large, straight),
     )
-    body = straight_lathe(cone_profile, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0))
-    cup_large = socket_cup_profile(
-        od_large, wall_large, socket_od_large, cup_len_large,
-        cup_len_large * 0.956, sleeve_len_mm=cup_len_large)
+    large_end = () if plain_large_end else (straight_lathe(
+        socket_cup_profile(
+            od_large, wall_large, socket_od_large, cup_len_large,
+            cup_len_large * 0.956, sleeve_len_mm=cup_len_large),
+        (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),)
     cup_small = socket_cup_profile(od_small, wall_small, socket_od_small, cup_len_small, cup_len_small * 0.956)
     offset = float(offset_mm)
+    if plain_large_end:
+        # excentrická KG redukce: OBA konce jsou svislé, posun je jen v kuželu.
+        # dole holý válec OD od_large se středem -offset, nahoře samice na ose,
+        # mezi nimi krátký kužel vedený šikmo (STEP 222700z: dolní střed -23,1,
+        # horní 0, kužel 29 mm). Těla se překrývají, tvoří jeden IFC kus.
+        axis_start = (-offset, 0.0, 0.0)
+        cone_rise = cone_end - straight
+        barrel = tube_lathe(od_large, wall_large, straight,
+                            start=axis_start, direction=(0.0, 1.0, 0.0))
+        # Jeden kužel se dvěma kruhy různého poloměru i středu — žádné schody,
+        # rovné hrany mezi odpovídajícími body kružnic.
+        cone = Taper(
+            bottom=(r_large_body, float(wall_large), 0.0),
+            top=(r_small_body, float(wall_small), offset),
+            location=(-offset, straight, 0.0),
+            depth=cone_rise,
+        )
+        socket_len = length - cone_end
+        cup_top = socket_cup_profile(
+            od_small, wall_small, socket_od_small, socket_len, socket_len * 0.956)
+        socket = straight_lathe(cup_top, (0.0, length, 0.0), (0.0, -1.0, 0.0))
+        mouths = (
+            (np.array(axis_start), np.array((0.0, -1.0, 0.0))),
+            (np.array((0.0, length, 0.0)), np.array((0.0, 1.0, 0.0))),
+        )
+        return SweptBody((barrel, cone, socket)), mouths
+    body = straight_lathe(cone_profile, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0))
     lathes = (
         body,
-        straight_lathe(cup_large, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+        *large_end,
         straight_lathe(cup_small, (offset, length, 0.0), (0.0, -1.0, 0.0)),
     )
     mouths = (
@@ -339,6 +391,13 @@ def swept_bounds(body, step_mm=1.0):
     """Near-exact bounding box (mm) of the tessellated-equivalent solids."""
     points = []
     for lathe in body.lathes:
+        if isinstance(lathe, Taper):
+            loc = np.asarray(lathe.location, float)
+            for spec, y in ((lathe.bottom, loc[1]), (lathe.top, loc[1] + float(lathe.depth))):
+                r, _, cx = spec
+                for phi in np.arange(0.0, 2.0 * np.pi, np.deg2rad(5.0)):
+                    points.append((loc[0] + cx + r * np.cos(phi), y, -r * np.sin(phi)))
+            continue
         origin, normal, x_axis = (np.asarray(v, float) for v in (lathe.location, lathe.normal, lathe.x_axis))
         y_axis = np.cross(normal, x_axis)
         axis_point = origin + np.asarray(lathe.axis_location) @ np.vstack((x_axis, y_axis, normal))
@@ -371,6 +430,27 @@ def lathes_to_ifc(file, body):
     """IfcRevolvedAreaSolid items for a SweptBody (coordinates in mm, the file unit)."""
     items = []
     for lathe in body.lathes:
+        if isinstance(lathe, Taper):
+            def hollow(spec):
+                r, wall, cx = spec
+                return file.create_entity(
+                    "IfcCircleHollowProfileDef", ProfileType="AREA",
+                    Radius=float(r), WallThickness=float(wall),
+                    Position=file.create_entity("IfcAxis2Placement2D",
+                        Location=file.create_entity("IfcCartesianPoint", Coordinates=(float(cx), 0.0))),
+                )
+            items.append(file.create_entity(
+                "IfcExtrudedAreaSolidTapered",
+                SweptArea=hollow(lathe.bottom), EndSweptArea=hollow(lathe.top),
+                Position=file.create_entity("IfcAxis2Placement3D",
+                    Location=file.create_entity("IfcCartesianPoint",
+                        Coordinates=tuple(float(c) for c in lathe.location)),
+                    Axis=file.create_entity("IfcDirection", DirectionRatios=(0.0, 1.0, 0.0)),
+                    RefDirection=file.create_entity("IfcDirection", DirectionRatios=(1.0, 0.0, 0.0))),
+                ExtrudedDirection=file.create_entity("IfcDirection", DirectionRatios=(0.0, 0.0, 1.0)),
+                Depth=float(lathe.depth),
+            ))
+            continue
         def curve(points_2d):
             return file.create_entity(
                 "IfcPolyline",

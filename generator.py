@@ -10,7 +10,7 @@ import ifcopenshell.util.element
 import ifcopenshell.util.placement
 import numpy as np
 
-from swept_geometrie import SweptBody, lathes_to_ifc, swept_bounds
+from swept_geometrie import SweptBody, Taper, lathes_to_ifc, swept_bounds
 
 
 def _point(file, xyz):
@@ -72,7 +72,8 @@ def validate_library(path, records):
         swept = record["swept"]
         items = fitting_type.RepresentationMaps[0].MappedRepresentation.Items
         if len(items) != len(swept.lathes) or not all(
-            item.is_a("IfcRevolvedAreaSolid") for item in items
+            item.is_a("IfcRevolvedAreaSolid") or item.is_a("IfcExtrudedAreaSolidTapered")
+            for item in items
         ):
             raise RuntimeError(f"IFC neobsahuje tažená tělesa: {definition.article}")
 
@@ -166,7 +167,13 @@ def generate_catalogue_library(items, output_path, name="PVC-U KG"):
             "IfcShapeRepresentation",
             ContextOfItems=context,
             RepresentationIdentifier="Body",
-            RepresentationType="SweptSolid",
+            # IfcExtrudedAreaSolidTapered není v IFC4 povolen v reprezentaci
+            # SweptSolid; excentrická redukce ho potřebuje => SolidModel.
+            RepresentationType=(
+                "SolidModel"
+                if any(isinstance(l, Taper) for l in record["swept"].lathes)
+                else "SweptSolid"
+            ),
             Items=lathes_to_ifc(file, record["swept"]),
         )
         representation_map = file.create_entity(
