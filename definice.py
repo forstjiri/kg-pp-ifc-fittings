@@ -1,6 +1,15 @@
-"""Datové třídy portu a tvarovky; rozměry Žijí v data/*.json."""
+"""Datové třídy portu a tvarovky; rozměry žijí v data/*.json."""
 
 from dataclasses import dataclass
+
+# Ze STEP naměřené rozměry odboček KG:
+# (délka hrot→hnízdo, vrchol od hrotu, délka odbočky, úhel, DN, DN odbočky)
+BRANCH_MEASURED = {
+    "220300z": (277.0, 90.65, 187.3, 45, 110, 110),
+    "220400z": (240.5, 122.3, 118.9, 87, 110, 110),
+    "222320z": (317.5, 86.0, 227.4, 45, 160, 110),
+    "222420z": (273.5, 143.7, 143.0, 87, 160, 110),
+}
 
 
 @dataclass(frozen=True)

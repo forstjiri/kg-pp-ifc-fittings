@@ -1,59 +1,42 @@
-"""True parametric bodies: meridian profiles lathed along straight and arc centrelines.
+"""Přesné parametrické tělesa: meridiánové profily revolucí podél přímky/oblouku.
 
-Every piece is an IfcRevolvedAreaSolid (IFC4 SweptSolid): a closed profile in the
-XY plane of its own frame, revolved about an axis lying in that plane.  The axis
-is given in the profile frame, as IFC and IfcOpenShell expect.  No boolean, no
-tessellation: the shape stays exact at any zoom and costs a few kB per fitting.
+Každý kus je IfcRevolvedAreaSolid (IFC4 SweptSolid): uzavřený profil v XY rovině
+vlastního rámu, otočený kolem osy ležící v téže rovině. Žádné booleany, žádná
+tessellace — tvar zůstává přesný při libovolném přiblížení.
 """
-
 from dataclasses import dataclass
-
 import numpy as np
-
-
+from ifc_util import axis, direction, point
 @dataclass(frozen=True)
 class Lathe:
-    profile: tuple  # ((radius_mm, axial_mm), ...) closed section, radius >= 0
-    location: tuple  # profile frame origin, mm
-    normal: tuple  # profile plane normal (frame Z)
-    x_axis: tuple  # frame X
-    axis_location: tuple  # revolution axis, in the profile frame
+    profile: tuple  # ((radius_mm, axial_mm), ...) uzavřený řez, radius >= 0
+    location: tuple  # počátek profilového rámu
+    normal: tuple  # normála roviny profilu (rámu Z)
+    x_axis: tuple  # rámu X
+    axis_location: tuple  # osa revoluce v profilovém rámci
     axis_direction: tuple
-    angle: float  # radians
-    void_profiles: tuple = ()  # closed inner sections carved out of the revolve
-    circle: tuple = ()  # (outer_radius_mm, bore_radius_mm): hollow circular section
-
-
+    angle: float  # radiány
+    void_profiles: tuple = ()
+    circle: tuple = ()  # (outer_radius_mm, bore_radius_mm): dutý kruhový řez
 @dataclass(frozen=True)
 class SweptBody:
     lathes: tuple
-
-
 @dataclass(frozen=True)
 class Taper:
-    """IfcExtrudedAreaSolidTapered: one lofted solid between two hollow circles.
+    """IfcExtrudedAreaSolidTapered: jeden loft mezi dvěma dutými kruhy.
 
-    The two circles may have different radii *and centres*, which is exactly
-    what an eccentric reducer cone needs — no steps, no tilt, pure SweptSolid.
-    `bottom`/`top` are (outer_radius, wall_thickness, x_offset) in the profile
-    frame; `location` is the world centre of the bottom circle.
+    Kruhy mohou mít různé poloměry *i středy* — přesně to potřebuje excentrická
+    redukce (bez schodů, bez naklápění). `bottom`/`top` = (r, tloušťka, x-offset).
     """
     bottom: tuple
     top: tuple
     location: tuple
     depth: float
-
-
 def _unit(vector):
     vector = np.asarray(vector, float)
     return vector / np.linalg.norm(vector)
-
-
 def straight_lathe(profile, start, direction):
-    """Revolve a meridian profile about the straight centreline start -> direction.
-
-    Profile axial coordinate runs along the centreline from `start`.
-    """
+    """Revolve meridiánového profilu podél přímky start -> direction."""
     direction = _unit(direction)
     reference = (0.0, 0.0, 1.0) if abs(direction[2]) < 0.9 else (0.0, 1.0, 0.0)
     normal = _unit(np.cross(direction, reference))
@@ -62,85 +45,60 @@ def straight_lathe(profile, start, direction):
         tuple(profile), tuple(map(float, start)), tuple(normal), tuple(x_axis),
         (0.0, 0.0, 0.0), (0.0, 1.0, 0.0), 2.0 * np.pi,
     )
-
-
 def arc_lathe(r_body, r_bore, start, tangent_in, tangent_out, radius):
-    """Revolve the hollow circular pipe section about the bend axis by the bend angle.
-
-    `start` is the pipe-axis point where the bend begins; the section is the
-    annulus (outer r_body, bore r_bore) in the plane perpendicular to `tangent_in`.
-    """
+    """Dutý kruhový řez revolucí kolem osy ohybu o úhel mezi tečnami."""
     d0, d1 = _unit(tangent_in), _unit(tangent_out)
     bend_axis = _unit(np.cross(d0, d1))
     to_centre = _unit(np.cross(bend_axis, d0))
-    x_axis = to_centre
-    normal = d0
-    # IfcOpenShell rotates clockwise about the declared axis for positive angles.
     sign = -1.0 if np.dot(np.cross(bend_axis, -to_centre * radius), d1 - d0) < 0 else 1.0
     return Lathe(
-        (), tuple(map(float, start)), tuple(normal), tuple(x_axis),
-        (float(radius), 0.0, 0.0), (0.0, float(sign), 0.0), float(np.arccos(np.clip(np.dot(d0, d1), -1, 1))),
+        (), tuple(map(float, start)), tuple(d0), tuple(to_centre),
+        (float(radius), 0.0, 0.0), (0.0, float(sign), 0.0),
+        float(np.arccos(np.clip(np.dot(d0, d1), -1, 1))),
         (), (float(r_body), float(r_bore)),
     )
-
-
 def socket_cup_profile(od_mm, wall_mm, socket_od_mm, bore_end_mm, cone_end_mm,
                        sleeve_len_mm=None):
-    """Concentric socket cup, scaled from the measured KG OD110 reference.
-
-    Closed meridian section: mouth lip, two retaining rings with grooves, taper to
-    the body wall, straight bore to `bore_end_mm`, conical cup back to the lip.
-    With `sleeve_len_mm` the collar OD continues as a full boss up to that depth
-    (measured on the STEP eccentric reducer: thick socket, not a body + ring).
-    """
+    """Hnízdový profil měřený na KG OD110, škálovaný podle OD."""
     od = float(od_mm)
     scale = od / 110.4
     wall = 3.3 * scale if wall_mm is None else float(wall_mm)
     r_body, r_bore = od / 2, od / 2 - wall
     r_collar = float(socket_od_mm) / 2
-    r_mouth = r_body + 3.2 * scale
-    r_cup = r_body + 0.3 * scale
+    r_mouth, r_cup = r_body + 3.2 * scale, r_body + 0.3 * scale
     groove = r_collar - 3.0 * scale
-    if r_collar <= r_mouth + 0.5 * scale or groove <= r_mouth or r_bore + 1.7 * scale >= r_cup:
+    if (r_collar <= r_mouth + 0.5 * scale or groove <= r_mouth
+            or r_bore + 1.7 * scale >= r_cup):
         raise ValueError("socket proportions do not fit the measured ring stack")
-    outer_tail = (
-        (r_body, 21.0 * scale),
-        (r_collar, 22.5 * scale),
-        (r_collar, float(sleeve_len_mm)),
-    ) if sleeve_len_mm else ((r_body, float(bore_end_mm)),)
+    tail = ((r_body, 21.0 * scale), (r_collar, 22.5 * scale),
+            (r_collar, float(sleeve_len_mm))) if sleeve_len_mm else (
+                (r_body, float(bore_end_mm)),)
     return (
         (r_cup, 0.0), (r_mouth, 0.0), (r_mouth, 3.0 * scale),
         (r_collar, 3.8 * scale), (r_collar, 5.0 * scale),
         (groove, 6.2 * scale), (groove, 15.8 * scale),
-        (r_body + 0.3 * scale, 16.8 * scale), (r_collar, 17.8 * scale), (r_collar, 18.8 * scale),
-        (r_body + 3.6 * scale, 19.2 * scale),
-        *outer_tail,
-        (r_bore, float(bore_end_mm)),
+        (r_body + 0.3 * scale, 16.8 * scale), (r_collar, 17.8 * scale),
+        (r_collar, 18.8 * scale), (r_body + 3.6 * scale, 19.2 * scale),
+        *tail, (r_bore, float(bore_end_mm)),
         (r_bore + 1.7 * scale, float(cone_end_mm)),
     )
-
-
-def tube_lathe(od_mm, wall_mm, length_mm, start=(0.0, 0.0, 0.0), direction=(0.0, 1.0, 0.0)):
-    """Plain hollow tube: rectangular annulus section revolved about the centreline."""
-    r_body, r_bore = float(od_mm) / 2, float(od_mm) / 2 - float(wall_mm)
-    profile = ((r_bore, 0.0), (r_body, 0.0), (r_body, float(length_mm)), (r_bore, float(length_mm)))
+def tube_lathe(od_mm, wall_mm, length_mm, start=(0.0, 0.0, 0.0),
+               direction=(0.0, 1.0, 0.0)):
+    """Prostá dutá trubka: prstencový řez revolucí podél osy."""
+    outer, bore = float(od_mm) / 2, float(od_mm) / 2 - float(wall_mm)
+    profile = ((bore, 0.0), (outer, 0.0), (outer, float(length_mm)),
+               (bore, float(length_mm)))
     return straight_lathe(profile, start, direction)
-
-
-def socket_run_lathes(length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm, sockets="both", start_mm=0.0, direction=(0.0, 1.0, 0.0)):
-    """Straight run as overlapping lathes: through tube plus socket cup(s) at the ends.
-
-    Returns (SweptBody, mouths) with mouth points on the centreline and outward axes.
-    """
-    od, wall = float(od_mm), float(wall_mm)
+def socket_run_lathes(length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm,
+                      sockets="both", start_mm=0.0, direction=(0.0, 1.0, 0.0)):
+    """Přímý úsek jako překrývající se lathe: trubka + hnízda na koncích."""
     length, cup_len, start = float(length_mm), float(cup_len_mm), float(start_mm)
     axis = _unit(direction)
     if length < cup_len:
         raise ValueError("run shorter than its sockets")
-    tube = tube_lathe(od, wall, length, start=(tuple(start * axis)), direction=axis)
-    cup = socket_cup_profile(od, wall, socket_od_mm, cup_len, cup_len * 0.956)
-    lathes = [tube]
-    mouths = []
+    tube = tube_lathe(od_mm, wall_mm, length, start=tuple(start * axis), direction=axis)
+    cup = socket_cup_profile(od_mm, wall_mm, socket_od_mm, cup_len, cup_len * 0.956)
+    lathes, mouths = [tube], []
     if sockets in ("both", "start"):
         lathes.append(straight_lathe(cup, tuple(start * axis), axis))
         mouths.append((start * axis, -axis))
@@ -149,350 +107,236 @@ def socket_run_lathes(length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm, socke
         lathes.append(straight_lathe(cup, tuple(end * axis), -axis))
         mouths.append((end * axis, axis))
     return SweptBody(tuple(lathes)), tuple(mouths)
-
-
 def reducer_lathes(
     length_mm, od_large, od_small, wall_large, wall_small,
     socket_od_large, socket_od_small, cup_len_large, cup_len_small,
-    offset_mm=0.0, straight_large_mm=0.0, cone_len_mm=None,
-    plain_large_end=False,
+    offset_mm=0.0, straight_large_mm=0.0, cone_len_mm=None, plain_large_end=False,
 ):
-    """Reducer along +Y: socket boss, cone, then straight small socket section.
+    """Redukce podél +Y: hnízdo/široký konec, kužel, malé hnízdo.
 
-    Socket cup at each end; `offset_mm` shifts the small end sideways
-    (eccentric reducer). `straight_large_mm` is the straight cylinder length
-    at the large socket before the cone starts; `cone_len_mm` the cone length
-    (default: cone runs to the small mouth). Measured on STEP 222700z: boss
-    OD194 x 88 mm, cone 29 mm, then straight OD110.
-
-    With `plain_large_end` the large end is a plain DN-size barrel (OD
-    `od_large`, bore `od_large - 2*wall_large`), offset `-offset_mm` sideways;
-    both ends are vertical and only the short cone shifts sideways. The only
-    female socket is at the small end (STEP 222700z: bottom mouth OD160/ID152.2
-    centred at x=-23.1, small end centred at x=0).
+    `plain_large_end` = dole holý válec se středem -offset, nahoře samice na ose,
+    mezi nimi jeden kužel se dvěma kruhy různého poloměru i středu (STEP 222700z).
     """
     length = float(length_mm)
     straight = min(float(straight_large_mm), length - 5.0)
-    cone_end = length if cone_len_mm is None else min(
-        straight + float(cone_len_mm), length)
-    r_large_body = float(od_large) / 2
-    r_small_body = float(od_small) / 2
-    r_bore_large = r_large_body - float(wall_large)
-    # profil je pro oba režimy stejný: rovný válec OD od_large, pak kužel, malý konec.
-    # (STEP 222700z: široký díl je holý konec DN160, OD 160 / ID 152.2, posunutý -23.1)
-    cone_profile = (
-        (r_bore_large, 0.0), (r_large_body, 0.0),
-        (r_large_body, straight),
-        (r_small_body, cone_end),
-        (r_small_body, length),
-        (r_small_body - float(wall_small), length),
-        (r_bore_large, straight),
-    )
-    large_end = () if plain_large_end else (straight_lathe(
-        socket_cup_profile(
-            od_large, wall_large, socket_od_large, cup_len_large,
-            cup_len_large * 0.956, sleeve_len_mm=cup_len_large),
-        (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),)
-    cup_small = socket_cup_profile(od_small, wall_small, socket_od_small, cup_len_small, cup_len_small * 0.956)
+    cone_end = length if cone_len_mm is None else min(straight + float(cone_len_mm), length)
+    r_large, r_small = float(od_large) / 2, float(od_small) / 2
+    bore_large = r_large - float(wall_large)
     offset = float(offset_mm)
     if plain_large_end:
-        # excentrická KG redukce: OBA konce jsou svislé, posun je jen v kuželu.
-        # dole holý válec OD od_large se středem -offset, nahoře samice na ose,
-        # mezi nimi krátký kužel vedený šikmo (STEP 222700z: dolní střed -23,1,
-        # horní 0, kužel 29 mm). Těla se překrývají, tvoří jeden IFC kus.
         axis_start = (-offset, 0.0, 0.0)
-        cone_rise = cone_end - straight
-        barrel = tube_lathe(od_large, wall_large, straight,
-                            start=axis_start, direction=(0.0, 1.0, 0.0))
-        # Jeden kužel se dvěma kruhy různého poloměru i středu — žádné schody,
-        # rovné hrany mezi odpovídajícími body kružnic.
-        cone = Taper(
-            bottom=(r_large_body, float(wall_large), 0.0),
-            top=(r_small_body, float(wall_small), offset),
-            location=(-offset, straight, 0.0),
-            depth=cone_rise,
-        )
+        barrel = tube_lathe(od_large, wall_large, straight, start=axis_start)
+        cone = Taper((r_large, float(wall_large), 0.0),
+                     (r_small, float(wall_small), offset),
+                     (-offset, straight, 0.0), cone_end - straight)
         socket_len = length - cone_end
-        cup_top = socket_cup_profile(
-            od_small, wall_small, socket_od_small, socket_len, socket_len * 0.956)
-        socket = straight_lathe(cup_top, (0.0, length, 0.0), (0.0, -1.0, 0.0))
-        mouths = (
-            (np.array(axis_start), np.array((0.0, -1.0, 0.0))),
-            (np.array((0.0, length, 0.0)), np.array((0.0, 1.0, 0.0))),
-        )
+        cup = socket_cup_profile(od_small, wall_small, socket_od_small,
+                                 socket_len, socket_len * 0.956)
+        socket = straight_lathe(cup, (0.0, length, 0.0), (0.0, -1.0, 0.0))
+        mouths = ((np.array(axis_start), np.array((0.0, -1.0, 0.0))),
+                  (np.array((0.0, length, 0.0)), np.array((0.0, 1.0, 0.0))))
         return SweptBody((barrel, cone, socket)), mouths
-    body = straight_lathe(cone_profile, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0))
-    lathes = (
-        body,
-        *large_end,
-        straight_lathe(cup_small, (offset, length, 0.0), (0.0, -1.0, 0.0)),
+    profile = (
+        (bore_large, 0.0), (r_large, 0.0), (r_large, straight),
+        (r_small, cone_end), (r_small, length),
+        (r_small - float(wall_small), length), (bore_large, straight),
     )
-    mouths = (
-        (np.zeros(3), np.array((0.0, -1.0, 0.0))),
-        (np.array((offset, length, 0.0)), np.array((0.0, 1.0, 0.0))),
-    )
+    large_end = straight_lathe(
+        socket_cup_profile(od_large, wall_large, socket_od_large, cup_len_large,
+                           cup_len_large * 0.956, sleeve_len_mm=cup_len_large),
+        (0.0, 0.0, 0.0), (0.0, 1.0, 0.0))
+    cup_small = socket_cup_profile(od_small, wall_small, socket_od_small,
+                                   cup_len_small, cup_len_small * 0.956)
+    lathes = (straight_lathe(profile, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+              large_end,
+              straight_lathe(cup_small, (offset, length, 0.0), (0.0, -1.0, 0.0)))
+    mouths = ((np.zeros(3), np.array((0.0, -1.0, 0.0))),
+              (np.array((offset, length, 0.0)), np.array((0.0, 1.0, 0.0))))
     return SweptBody(lathes), mouths
-
-
 def branch_lathes(
     length_main_mm, od_main, wall_main, socket_od_main, cup_len_main,
     od_branch, wall_branch, socket_od_branch, cup_len_branch,
     vertex_y_mm, z3_mm, angle_deg,
 ):
-    """Junction as overlapping lathes: socketed main run plus an angled branch arm.
-
-    `vertex_y_mm` is the branch-axis intersection with the main axis, in the
-    centred main-run coordinates (catalogue z2 from the socket end). The main
-    run has a socket cup only at its +Y end (the other end is a spigot). The
-    branch tube starts on the main axis and penetrates the main wall; the
-    junction is a solid overlap, no boolean.
-    """
+    """Odbočka jako překrývající se lathe: hnízdovaný hlavní běh + šikmá větev."""
     angle = np.deg2rad(float(angle_deg))
     main, mouths = socket_run_lathes(
         length_main_mm, od_main, wall_main, socket_od_main, cup_len_main,
-        sockets="end", start_mm=-float(length_main_mm) / 2,
-    )
+        sockets="end", start_mm=-float(length_main_mm) / 2)
     junction = np.array((0.0, float(vertex_y_mm), 0.0))
     direction = np.array((np.sin(angle), np.cos(angle), 0.0))
-    # trubka končí přesně v ústí (z3); hnízdo ji překrývá zevnitř
-    branch = tube_lathe(od_branch, wall_branch, float(z3_mm), start=junction, direction=direction)
-    cup = socket_cup_profile(od_branch, wall_branch, socket_od_branch, cup_len_branch, cup_len_branch * 0.956)
+    branch = tube_lathe(od_branch, wall_branch, float(z3_mm),
+                        start=junction, direction=direction)
+    cup = socket_cup_profile(od_branch, wall_branch, socket_od_branch,
+                             cup_len_branch, cup_len_branch * 0.956)
     branch_cup = straight_lathe(cup, junction + float(z3_mm) * direction, -direction)
-    lathes = main.lathes + (branch, branch_cup)
-    mouths = mouths + ((junction + float(z3_mm) * direction, direction),)
-    return SweptBody(lathes), mouths
-
-
+    return (SweptBody(main.lathes + (branch, branch_cup)),
+            mouths + ((junction + float(z3_mm) * direction, direction),))
 def cleanout_lathes(
     length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm,
     z1_mm, cover_diameter_mm, cover_reach_mm,
     cover_thickness_mm=None, neck_diameter_mm=None,
 ):
-    """Access piece along +Y: socket cup at the y=0 mouth, plain spigot end,
-    plus a side opening at `z1_mm` with a neck stub and a cap.
-
-    `cover_reach_mm` is the cap face distance from the run axis. Measured on
-    STEP 175600z: neck OD 98 sticking out ~14 mm, cap OD 111, cap ~17 mm thick,
-    cap face 86.5 mm off the axis, cap axis 120 from the spigot end.
-    """
+    """Čistící kus podél +Y: hnízdo u počátku, boční hrdlo víčkem."""
     run, mouths = socket_run_lathes(
         length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm,
-        sockets="start", start_mm=0.0, direction=(0.0, 1.0, 0.0),
-    )
-    side_od = float(cover_diameter_mm)
-    reach = float(cover_reach_mm)
+        sockets="start", start_mm=0.0, direction=(0.0, 1.0, 0.0))
+    side_od, reach = float(cover_diameter_mm), float(cover_reach_mm)
     thickness = 0.15 * side_od if cover_thickness_mm is None else float(cover_thickness_mm)
-    neck_d = side_od - 13.0 if neck_diameter_mm is None else float(neck_diameter_mm)
-    stub = tube_lathe(neck_d, float(wall_mm), reach - thickness, start=(0.0, float(z1_mm), 0.0), direction=(1.0, 0.0, 0.0))
-    r_cover = side_od / 2
-    cover_profile = ((0.0, 0.0), (r_cover, 0.0), (r_cover, thickness), (0.0, thickness))
-    cover = straight_lathe(cover_profile, (reach, float(z1_mm), 0.0), (-1.0, 0.0, 0.0))
+    neck = side_od - 13.0 if neck_diameter_mm is None else float(neck_diameter_mm)
+    stub = tube_lathe(neck, float(wall_mm), reach - thickness,
+                      start=(0.0, float(z1_mm), 0.0), direction=(1.0, 0.0, 0.0))
+    radius = side_od / 2
+    cover = straight_lathe(
+        ((0.0, 0.0), (radius, 0.0), (radius, thickness), (0.0, thickness)),
+        (reach, float(z1_mm), 0.0), (-1.0, 0.0, 0.0))
     return SweptBody(run.lathes + (stub, cover)), mouths
-
-
 def cap_lathes(od_mm, wall_mm, socket_od_mm, cup_len_mm, length_mm):
-    """KGK plug: capped body with a socket cup at the open mouth."""
+    """Zátka: hnízdo na ústí a plná záslepka za ním."""
     od, wall = float(od_mm), float(wall_mm)
-    r_body, r_bore = od / 2, od / 2 - wall
-    r_collar = float(socket_od_mm) / 2
-    cup = socket_cup_profile(od, wall, socket_od_mm, float(cup_len_mm), float(cup_len_mm) * 0.956)
-    # solid plug behind the cup: radius from r_bore to r_body, closed at the back
+    outer, bore = od / 2, od / 2 - wall
+    cup = socket_cup_profile(od, wall, socket_od_mm, float(cup_len_mm),
+                             float(cup_len_mm) * 0.956)
     plug = (
-        (r_bore, float(cup_len_mm)), (r_body, float(cup_len_mm)),
-        (r_body, float(length_mm)), (0.0, float(length_mm)), (0.0, float(cup_len_mm)),
+        (bore, float(cup_len_mm)), (outer, float(cup_len_mm)),
+        (outer, float(length_mm)), (0.0, float(length_mm)), (0.0, float(cup_len_mm)),
     )
-    lathes = (
-        straight_lathe(cup, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
-        straight_lathe(plug, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
-    )
-    mouths = ((np.zeros(3), np.array((0.0, -1.0, 0.0))),)
-    return SweptBody(lathes), mouths
-
-
+    lathes = (straight_lathe(cup, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+              straight_lathe(plug, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0)))
+    return SweptBody(lathes), ((np.zeros(3), np.array((0.0, -1.0, 0.0))),)
 def elbow_lathes(
     angle_deg, od_mm, socket_od_mm=None, wall_mm=None,
     socket_straight_mm=None, spigot_straight_mm=None, radius_mm=None,
     socket_len_mm=None, spigot_tip_mm=None, socket_on_spigot=False,
 ):
-    """Elbow with explicit dimensions (mm); None falls back to the measured
-    Ostendorf KG 45 deg OD110 reference (220220z), scaled by OD.
-
-    Centreline: straight socket run `socket_straight_mm`, circular arc with
-    `radius_mm`, straight spigot run `spigot_straight_mm`. `socket_len_mm` is
-    the cup depth, `spigot_tip_mm` the plain spigot-tip length before the body.
-    """
+    """Koleno z rozměrů (mm); None = měřený KG 45° OD110 (220220z) škálovaný."""
     angle = np.deg2rad(float(angle_deg))
     od = float(od_mm)
     if not 0 < angle < np.pi or od <= 0:
         raise ValueError("elbow needs a positive OD and an angle between 0 and 180 degrees")
     scale = od / 110.4
     wall = 3.3 * scale if wall_mm is None else float(wall_mm)
-    r_body, r_bore = od / 2, od / 2 - wall
-    radius = 56.5 * scale if radius_mm is None else float(radius_mm)
-    # jádro (OCCT i Revit) tiše zahodí oblouk s příliš malým vnitřním poloměrem
-    # (PP DN125: LSQ R=60,7 při r_bore=59,65); per-lathe měření dává limit
-    # mezi 2,5 a 4 mm vůči r_bore
-    radius = max(radius, r_bore + 4.0)
+    outer, bore = od / 2, od / 2 - wall
+    # OCCT/Revit tiše zahodí oblouk s příliš malým vnitřním poloměrem (PP DN125)
+    radius = max(56.5 * scale if radius_mm is None else float(radius_mm), bore + 4.0)
     tangent_start = 65.0 * scale if socket_straight_mm is None else float(socket_straight_mm)
     tangent_end = 64.0 * scale if spigot_straight_mm is None else float(spigot_straight_mm)
     socket_len = 57.0 * scale if socket_len_mm is None else float(socket_len_mm)
-    tip_len = 30.0 * scale if spigot_tip_mm is None else float(spigot_tip_mm)
+    tip = 30.0 * scale if spigot_tip_mm is None else float(spigot_tip_mm)
     r_collar = (126.9 * scale if socket_od_mm is None else float(socket_od_mm)) / 2
-    r_cup = (110.99 * scale) / 2
-    r_mouth = r_body + (58.4 - 55.2) * scale  # narrow face lip measured on the reference
+    r_cup, r_mouth = 110.99 * scale / 2, outer + 3.2 * scale
     groove = r_collar - 3.0 * scale
-    if r_cup <= r_body - wall or r_collar <= r_body + 3.0 * scale or tangent_start <= socket_len or tangent_end <= tip_len:
+    if (r_cup <= outer - wall or r_collar <= outer + 3.0 * scale
+            or tangent_start <= socket_len or tangent_end <= tip):
         raise ValueError("elbow dimensions do not leave a body between the ends")
-
-    # outer skin measured on the reference: lip, two thin retaining rings, grooves between/behind
     socket_profile = (
         (r_cup, 0.0), (r_mouth, 0.0), (r_mouth, 3.0 * scale),
-        (r_collar, 3.8 * scale), (r_collar, 5.0 * scale), (groove, 6.2 * scale), (groove, 15.8 * scale),
-        (r_body + 0.3 * scale, 16.8 * scale), (r_collar, 17.8 * scale), (r_collar, 18.8 * scale),
-        (r_body + 3.6 * scale, 19.2 * scale), (r_body, 21.0 * scale), (r_body, tangent_start),
-        # back along the bore and the slightly conical cup wall (never outside the outer skin)
-        (r_bore, tangent_start), (r_bore, socket_len + 4.0 * scale),
-        (r_bore + 1.7 * scale, socket_len * 0.956), (r_cup, 0.0),
+        (r_collar, 3.8 * scale), (r_collar, 5.0 * scale),
+        (groove, 6.2 * scale), (groove, 15.8 * scale),
+        (outer + 0.3 * scale, 16.8 * scale), (r_collar, 17.8 * scale),
+        (r_collar, 18.8 * scale), (outer + 3.6 * scale, 19.2 * scale),
+        (outer, 21.0 * scale), (outer, tangent_start),
+        (bore, tangent_start), (bore, socket_len + 4.0 * scale),
+        (bore + 1.7 * scale, socket_len * 0.956), (r_cup, 0.0),
     )
     spigot_profile = (
-        (r_bore, 0.0), (od / 2 - 0.1 * scale, 0.0), (od / 2 - 0.1 * scale, tip_len),
-        (r_body, tip_len), (r_body, tangent_end), (r_bore, tangent_end),
+        (bore, 0.0), (outer - 0.1 * scale, 0.0), (outer - 0.1 * scale, tip),
+        (outer, tip), (outer, tangent_end), (bore, tangent_end),
     )
     d0 = np.array((0.0, 1.0, 0.0))
     d1 = np.array((np.sin(angle), np.cos(angle), 0.0))
     arc_start = np.array((0.0, tangent_start, 0.0))
     arc_end = arc_start + radius * np.array((1 - np.cos(angle), np.sin(angle), 0.0))
-    if socket_on_spigot:
-        # Manufacturer KGB: socket on the angled leg, plain spigot on the
-        # straight leg (the two ends mirrored along the main Y axis).
-        lathes = (
-            straight_lathe(spigot_profile, (0, 0, 0), d0),
-            arc_lathe(r_body, r_bore, arc_start, d0, d1, radius),
-            straight_lathe(socket_profile, arc_end + d1 * tangent_end, -d1),
-        )
-        mouths = (
-            (np.zeros(3), -d0),  # spigot tip
-            (arc_end + d1 * tangent_end, d1),  # socket mouth
-        )
-    else:
-        lathes = (
-            straight_lathe(socket_profile, (0, 0, 0), d0),
-            arc_lathe(r_body, r_bore, arc_start, d0, d1, radius),
-            straight_lathe(spigot_profile, arc_end, d1),
-        )
-        mouths = (
-            (np.zeros(3), -d0),  # socket mouth
-            (arc_end + d1 * tangent_end, d1),  # spigot tip
-        )
-    return SweptBody(lathes), mouths
-
-
+    first = spigot_profile if socket_on_spigot else socket_profile
+    last = socket_profile if socket_on_spigot else spigot_profile
+    last_start = arc_end + d1 * tangent_end if socket_on_spigot else arc_end
+    last_direction = -d1 if socket_on_spigot else d1
+    lathes = (
+        straight_lathe(first, (0.0, 0.0, 0.0), d0),
+        arc_lathe(outer, bore, arc_start, d0, d1, radius),
+        straight_lathe(last, last_start, last_direction),
+    )
+    return SweptBody(lathes), ((np.zeros(3), -d0), (arc_end + d1 * tangent_end, d1))
 def swept_bounds(body, step_mm=1.0):
-    """Near-exact bounding box (mm) of the tessellated-equivalent solids."""
+    """Vektorizovaná obálka (mm) revolucí: vzorkování profilu a úhlů."""
     points = []
     for lathe in body.lathes:
         if isinstance(lathe, Taper):
-            loc = np.asarray(lathe.location, float)
-            for spec, y in ((lathe.bottom, loc[1]), (lathe.top, loc[1] + float(lathe.depth))):
+            origin = np.asarray(lathe.location, float)
+            phi = np.arange(0.0, 2 * np.pi, np.deg2rad(5.0))
+            for spec, height in ((lathe.bottom, 0.0), (lathe.top, float(lathe.depth))):
                 r, _, cx = spec
-                for phi in np.arange(0.0, 2.0 * np.pi, np.deg2rad(5.0)):
-                    points.append((loc[0] + cx + r * np.cos(phi), y, -r * np.sin(phi)))
+                points.append(np.column_stack((
+                    np.full_like(phi, origin[0] + cx) + r * np.cos(phi),
+                    np.full_like(phi, origin[1] + height), -r * np.sin(phi))))
             continue
-        origin, normal, x_axis = (np.asarray(v, float) for v in (lathe.location, lathe.normal, lathe.x_axis))
-        y_axis = np.cross(normal, x_axis)
-        axis_point = origin + np.asarray(lathe.axis_location) @ np.vstack((x_axis, y_axis, normal))
-        axis_dir = _unit(np.asarray(lathe.axis_direction) @ np.vstack((x_axis, y_axis, normal)))
-        angles = np.arange(0.0, lathe.angle + 1e-9, np.deg2rad(1.0))
+        origin, normal, x_axis = (np.asarray(v, float) for v in
+                                  (lathe.location, lathe.normal, lathe.x_axis))
+        basis = np.vstack((x_axis, np.cross(normal, x_axis), normal))
+        axis_point = origin + np.asarray(lathe.axis_location) @ basis
+        axis_dir = _unit(np.asarray(lathe.axis_direction) @ basis)
         if lathe.circle:
-            samples = [
-                (lathe.circle[0] * np.cos(phi), lathe.circle[0] * np.sin(phi))
-                for phi in np.arange(0.0, 2.0 * np.pi, np.deg2rad(5.0))
-            ]
+            phi = np.arange(0.0, 2 * np.pi, np.deg2rad(5.0))
+            profile = np.column_stack((lathe.circle[0] * np.cos(phi),
+                                       lathe.circle[0] * np.sin(phi)))
         else:
-            profile = np.asarray(lathe.profile, float)
-            samples = []
-            for (r0, s0), (r1, s1) in zip(profile, np.roll(profile, -1, axis=0)):
-                for t in np.linspace(0.0, 1.0, max(2, int(np.hypot(r1 - r0, s1 - s0) / step_mm) + 1)):
-                    samples.append((r0 + t * (r1 - r0), s0 + t * (s1 - s0)))
-        for r, s in samples:
-            base = origin + s * y_axis + r * x_axis
-            rel = base - axis_point
-            axial = (rel @ axis_dir) * axis_dir
-            radial = rel - axial
-            u, v = radial, np.cross(axis_dir, radial)
-            for phi in angles:  # same sense as the geometry kernel
-                points.append(axis_point + axial + np.cos(phi) * u - np.sin(phi) * v)
-    points = np.asarray(points)
-    return points.min(axis=0), points.max(axis=0)
-
-
+            raw = np.asarray(lathe.profile, float)
+            profile = np.vstack([
+                np.linspace(a, b, max(2, int(np.hypot(*(b - a)) / step_mm) + 1))
+                for a, b in zip(raw, np.roll(raw, -1, axis=0))
+            ])
+        base = origin + profile[:, 1:2] * basis[1] + profile[:, 0:1] * basis[0]
+        rel = base - axis_point
+        axial = (rel @ axis_dir)[:, None] * axis_dir
+        radial = rel - axial
+        u, v = radial, np.cross(axis_dir, radial)
+        angles = np.arange(0.0, lathe.angle + 1e-9, np.deg2rad(1.0))
+        points.append((axis_point + axial[:, None, :]
+                       + np.cos(angles)[None, :, None] * u[:, None, :]
+                       - np.sin(angles)[None, :, None] * v[:, None, :]).reshape(-1, 3))
+    bounds = np.vstack(points)
+    return bounds.min(axis=0), bounds.max(axis=0)
 def lathes_to_ifc(file, body):
-    """IfcRevolvedAreaSolid items for a SweptBody (coordinates in mm, the file unit)."""
+    """IfcRevolvedAreaSolid / IfcExtrudedAreaSolidTapered (souřadnice v mm)."""
+    def hollow(spec):
+        r, wall, cx = spec
+        return file.create_entity(
+            "IfcCircleHollowProfileDef", ProfileType="AREA", Radius=float(r),
+            WallThickness=float(wall),
+            Position=file.create_entity("IfcAxis2Placement2D", Location=point(file, (cx, 0.0))),
+        )
+    def curve(profile):
+        return file.create_entity(
+            "IfcPolyline", Points=[point(file, (r, s)) for r, s in list(profile) + [profile[0]]]
+        )
     items = []
     for lathe in body.lathes:
         if isinstance(lathe, Taper):
-            def hollow(spec):
-                r, wall, cx = spec
-                return file.create_entity(
-                    "IfcCircleHollowProfileDef", ProfileType="AREA",
-                    Radius=float(r), WallThickness=float(wall),
-                    Position=file.create_entity("IfcAxis2Placement2D",
-                        Location=file.create_entity("IfcCartesianPoint", Coordinates=(float(cx), 0.0))),
-                )
             items.append(file.create_entity(
                 "IfcExtrudedAreaSolidTapered",
                 SweptArea=hollow(lathe.bottom), EndSweptArea=hollow(lathe.top),
-                Position=file.create_entity("IfcAxis2Placement3D",
-                    Location=file.create_entity("IfcCartesianPoint",
-                        Coordinates=tuple(float(c) for c in lathe.location)),
-                    Axis=file.create_entity("IfcDirection", DirectionRatios=(0.0, 1.0, 0.0)),
-                    RefDirection=file.create_entity("IfcDirection", DirectionRatios=(1.0, 0.0, 0.0))),
-                ExtrudedDirection=file.create_entity("IfcDirection", DirectionRatios=(0.0, 0.0, 1.0)),
-                Depth=float(lathe.depth),
+                Position=axis(file, lathe.location, (0.0, 1.0, 0.0), (1.0, 0.0, 0.0)),
+                ExtrudedDirection=direction(file, (0.0, 0.0, 1.0)), Depth=float(lathe.depth),
             ))
             continue
-        def curve(points_2d):
-            return file.create_entity(
-                "IfcPolyline",
-                Points=[
-                    file.create_entity("IfcCartesianPoint", Coordinates=(float(r), float(s)))
-                    for r, s in list(points_2d) + [points_2d[0]]
-                ],
-            )
-
         if lathe.circle:
             outer, bore = lathe.circle
             profile = file.create_entity(
-                "IfcCircleHollowProfileDef",
-                ProfileType="AREA",
-                Radius=float(outer),
-                WallThickness=float(outer - bore),
-            )
+                "IfcCircleHollowProfileDef", ProfileType="AREA", Radius=float(outer),
+                WallThickness=float(outer - bore))
         elif lathe.void_profiles:
             profile = file.create_entity(
-                "IfcArbitraryProfileDefWithVoids",
-                ProfileType="AREA",
+                "IfcArbitraryProfileDefWithVoids", ProfileType="AREA",
                 OuterCurve=curve(lathe.profile),
-                InnerCurves=[curve(void) for void in lathe.void_profiles],
-            )
+                InnerCurves=[curve(void) for void in lathe.void_profiles])
         else:
-            profile = file.create_entity("IfcArbitraryClosedProfileDef", ProfileType="AREA", OuterCurve=curve(lathe.profile))
-        items.append(
-            file.create_entity(
-                "IfcRevolvedAreaSolid",
-                SweptArea=profile,
-                Position=file.create_entity(
-                    "IfcAxis2Placement3D",
-                    Location=file.create_entity("IfcCartesianPoint", Coordinates=tuple(float(c) for c in lathe.location)),
-                    Axis=file.create_entity("IfcDirection", DirectionRatios=tuple(float(c) for c in lathe.normal)),
-                    RefDirection=file.create_entity("IfcDirection", DirectionRatios=tuple(float(c) for c in lathe.x_axis)),
-                ),
-                Axis=file.create_entity(
-                    "IfcAxis1Placement",
-                    Location=file.create_entity("IfcCartesianPoint", Coordinates=tuple(float(c) for c in lathe.axis_location)),
-                    Axis=file.create_entity("IfcDirection", DirectionRatios=tuple(float(c) for c in lathe.axis_direction)),
-                ),
-                Angle=float(lathe.angle),
-            )
-        )
+            profile = file.create_entity(
+                "IfcArbitraryClosedProfileDef", ProfileType="AREA", OuterCurve=curve(lathe.profile))
+        items.append(file.create_entity(
+            "IfcRevolvedAreaSolid", SweptArea=profile,
+            Position=axis(file, lathe.location, lathe.normal, lathe.x_axis),
+            Axis=file.create_entity(
+                "IfcAxis1Placement", Location=point(file, lathe.axis_location),
+                Axis=direction(file, lathe.axis_direction)),
+            Angle=float(lathe.angle)))
     return items
