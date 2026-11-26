@@ -31,7 +31,8 @@ Checklist věcí, které knihovna zatím **neřeší**. Odškrtnuté = doplněno
 - [x] Vyšetřeno katalogové `z1` redukcí KG: neodpovídá STEP (34 vs 23,1 mm) ani logika rovných límců či dna → posun škálován `23,1 × DN/160`
 - [x] Čistící kus: krk + víčko ze STEP 175600z (KG), PP z katalogu M3+RE (`Z1`, `Z2`, `a`); IoU 0,91/0,51/0,70
 - [x] PP redukce: `Z1` od malého ústí do konce kuželu, rovný válec `L − Z1`
-- [ ] Souosé kusy na jeden uzavřený profil: čistící kus ani redukce nejsou souosé (boční hrdlo, excentricita), jediný kandidát je zátka a tam je zisk jen čistota modelu — odloženo
+- [x] Excentrická redukce KG: dole holý konec DN160 posunutý −23,1 mm, nahoře jediná samice, kužel jako **jeden** `IfcExtrudedAreaSolidTapered` (dva kruhy s různým středem a poloměrem) — bez naklonění těla, bez vrstvených schodů; IoU 0,84/0,85/0,84
+- [ ] Souosé kusy na jeden uzavřený meridián: čistící kus ani redukce nejsou souosé (boční hrdlo / excentricita), jediný kandidát je zátka s čistě kosmetickým ziskem — odloženo
 - [x] Registrace IoU testů se počítá jednou a ukládá do `data/ostendorf/align.json` (`register_cached`); celá sada z ~10,5 min na ~4 min. Zastaralá registraci chytí prahy IoU
 - [x] Funkční zkouška v Bonsai: odbočka KG 160/110 — trubka OD110 (`tools/check_connection.py` → `out/connection-check.ifc` načten v Blenderu/Bonsai), porty čtené zpět z IFC, osy opačné, hrot 66 mm uvnitř hnízda; PP mřížka zobrazena
 - [ ] PP stará řada (2021) má „oblouk 87,5°" bez hnízda — ponecháno mimo knihovnu
