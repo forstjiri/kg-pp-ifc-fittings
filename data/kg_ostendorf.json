@@ -12,7 +12,7 @@
    "status": "catalogue",
    "source": "katalog str. 33",
    "socket_zone_mm": 64,
-   "socket_zone_status": "catalogue (katalog str. 33 / výkres DN160)"
+   "socket_zone_status": "catalogue (katalog str. 33 / v\u00fdkres DN160)"
   },
   "125": {
    "insertion_depth_t_mm": 68,
@@ -28,34 +28,7 @@
    "status": "catalogue",
    "source": "katalog str. 33",
    "socket_zone_mm": 81,
-   "socket_zone_status": "catalogue (katalog str. 33 / výkres DN160)"
-  }
- },
- "pipes": {
-  "110": {
-   "dmax_mm": 127,
-   "wall_mm": 3.2,
-   "insertion_depth_t_mm": 66,
-   "status": "catalogue",
-   "source": "katalog str. 33",
-   "socket_zone_mm": 64,
-   "socket_zone_status": "catalogue (katalog str. 33 / výkres DN160)"
-  },
-  "125": {
-   "dmax_mm": 144,
-   "wall_mm": 3.2,
-   "insertion_depth_t_mm": 68,
-   "status": "catalogue",
-   "source": "katalog str. 33"
-  },
-  "160": {
-   "dmax_mm": 182,
-   "wall_mm": 4.0,
-   "insertion_depth_t_mm": 84,
-   "status": "catalogue",
-   "source": "katalog str. 33",
-   "socket_zone_mm": 81,
-   "socket_zone_status": "catalogue (katalog str. 33 / výkres DN160)"
+   "socket_zone_status": "catalogue (katalog str. 33 / v\u00fdkres DN160)"
   }
  },
  "elbows": [
@@ -71,7 +44,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 61.101,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": false,
    "socket_orientation_status": "measured (STEP 220200z)",
    "reference_origin": "socket",
@@ -89,7 +62,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 67.916,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": false,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -106,7 +79,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 82.415,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": true,
    "socket_orientation_status": "measured (STEP 222200z)",
    "reference_origin": "spigot",
@@ -124,7 +97,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 60.923,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": true,
    "socket_orientation_status": "measured (STEP 220210z)",
    "reference_origin": "socket",
@@ -142,7 +115,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 67.512,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": true,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -159,7 +132,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 81.42,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": true,
    "socket_orientation_status": "measured (STEP 222210z)",
    "reference_origin": "socket",
@@ -177,7 +150,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 60.147,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": false,
    "socket_orientation_status": "measured (STEP 220220z)",
    "reference_origin": "socket",
@@ -195,7 +168,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 66.419,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": false,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -212,7 +185,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 80.549,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": true,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -229,7 +202,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 60.287,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": false,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -246,7 +219,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 67.33,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": false,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -263,7 +236,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 80.754,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": true,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -280,7 +253,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 60.062,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": false,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -297,7 +270,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 66.521,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": false,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -314,7 +287,7 @@
    "source": "katalog str. 35",
    "series": "current",
    "take_out_base_mm": 80.491,
-   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivováno; katalogové t hrdla je v sockets",
+   "note": "take_out_base_mm = l1 - R*tan(alpha/2), derivov\u00e1no; katalogov\u00e9 t hrdla je v sockets",
    "socket_on_spigot": true,
    "socket_orientation_status": "estimated (podle nejblizsiho STEP clanku)",
    "reference_origin": "socket"
@@ -333,7 +306,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 45,
@@ -347,7 +320,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 45,
@@ -361,7 +334,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 45,
@@ -375,7 +348,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 45,
@@ -389,7 +362,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 45,
@@ -403,7 +376,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 87,
@@ -417,7 +390,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 87,
@@ -431,7 +404,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 87,
@@ -445,7 +418,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 87,
@@ -459,7 +432,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 87,
@@ -473,7 +446,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   },
   {
    "angle_deg": 87,
@@ -487,7 +460,7 @@
    "status": "catalogue",
    "source": "katalog str. 36",
    "series": "current",
-   "note": "katalogní L nesedí na STEP (viz plán), geometrie se bude stavět ze STEP/škálováním"
+   "note": "katalogn\u00ed L nesed\u00ed na STEP (viz pl\u00e1n), geometrie se bude stav\u011bt ze STEP/\u0161k\u00e1lov\u00e1n\u00edm"
   }
  ],
  "reducers": [
@@ -577,87 +550,87 @@
  "references": {
   "220000z": {
    "mesh": "ostendorf/220000z.json",
-   "summary": "STEP výrobní model; DN110, celková délka 564 mm, límec 125,6 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; DN110, celkov\u00e1 d\u00e9lka 564 mm, l\u00edmec 125,6 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "220200z": {
    "mesh": "ostendorf/220200z.json",
-   "summary": "STEP výrobní model; koleno 15° DN110, take-out 70,1 / 70,9 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; koleno 15\u00b0 DN110, take-out 70,1 / 70,9 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "220210z": {
    "mesh": "ostendorf/220210z.json",
-   "summary": "STEP výrobní model; koleno 30° DN110, take-out 76,9 / 76,7 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; koleno 30\u00b0 DN110, take-out 76,9 / 76,7 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "220220z": {
    "mesh": "ostendorf/220220z.json",
-   "summary": "STEP výrobní model; koleno 45° DN110, R 56,5 mm, take-out 88,4 / 87,4 mm, límec 126,9 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; koleno 45\u00b0 DN110, R 56,5 mm, take-out 88,4 / 87,4 mm, l\u00edmec 126,9 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "220300z": {
    "mesh": "ostendorf/220300z.json",
-   "summary": "STEP výrobní model; odbočka 45° 110/110, hrot–hnízdo 215,7 mm, průsečík 90,65 / 125,05 mm, odbočka 187,3 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; odbo\u010dka 45\u00b0 110/110, hrot\u2013hn\u00edzdo 215,7 mm, pr\u016fse\u010d\u00edk 90,65 / 125,05 mm, odbo\u010dka 187,3 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "220400z": {
    "mesh": "ostendorf/220400z.json",
-   "summary": "STEP výrobní model; odbočka 87° 110/110, hrot–hnízdo 179,0 mm, průsečík 132,15 / 46,85 mm, odbočka 118,6 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; odbo\u010dka 87\u00b0 110/110, hrot\u2013hn\u00edzdo 179,0 mm, pr\u016fse\u010d\u00edk 132,15 / 46,85 mm, odbo\u010dka 118,6 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "222000z": {
    "mesh": "ostendorf/222000z.json",
-   "summary": "STEP výrobní model; DN160 trubka, celková délka 581 mm, límec 180,4 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; DN160 trubka, celkov\u00e1 d\u00e9lka 581 mm, l\u00edmec 180,4 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "222000z-socket": {
    "mesh": "ostendorf/222000z-socket.json",
-   "summary": "STEP výrobní model; samostatně extrahované hrdlo DN160, navazuje na měření trubky 222000z.",
+   "summary": "STEP v\u00fdrobn\u00ed model; samostatn\u011b extrahovan\u00e9 hrdlo DN160, navazuje na m\u011b\u0159en\u00ed trubky 222000z.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "222200z": {
    "mesh": "ostendorf/222200z.json",
-   "summary": "STEP výrobní model; koleno 15° DN160, měřený mesh výrobního modelu.",
+   "summary": "STEP v\u00fdrobn\u00ed model; koleno 15\u00b0 DN160, m\u011b\u0159en\u00fd mesh v\u00fdrobn\u00edho modelu.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "222210z": {
    "mesh": "ostendorf/222210z.json",
-   "summary": "STEP výrobní model; koleno 30° DN160, měřený mesh výrobního modelu.",
+   "summary": "STEP v\u00fdrobn\u00ed model; koleno 30\u00b0 DN160, m\u011b\u0159en\u00fd mesh v\u00fdrobn\u00edho modelu.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "222320z": {
    "mesh": "ostendorf/222320z.json",
-   "summary": "STEP výrobní model; odbočka 45° 160/110, hrot–hnízdo 317,5 mm, průsečík 86,0 / 231,5 mm, odbočka 227,4 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; odbo\u010dka 45\u00b0 160/110, hrot\u2013hn\u00edzdo 317,5 mm, pr\u016fse\u010d\u00edk 86,0 / 231,5 mm, odbo\u010dka 227,4 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "222420z": {
    "mesh": "ostendorf/222420z.json",
-   "summary": "STEP výrobní model; odbočka 87° 160/110, hrot–hnízdo 273,5 mm, průsečík 143,7 / 129,8 mm, odbočka 143,0 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; odbo\u010dka 87\u00b0 160/110, hrot\u2013hn\u00edzdo 273,5 mm, pr\u016fse\u010d\u00edk 143,7 / 129,8 mm, odbo\u010dka 143,0 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "222700z": {
    "mesh": "ostendorf/222700z.json",
-   "summary": "STEP výrobní model; redukce 160/110, hrot DN160–hnízdo DN110 176,5 mm, osové odsazení 23,1 mm.",
+   "summary": "STEP v\u00fdrobn\u00ed model; redukce 160/110, hrot DN160\u2013hn\u00edzdo DN110 176,5 mm, osov\u00e9 odsazen\u00ed 23,1 mm.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   },
   "175600z": {
    "mesh": "ostendorf/175600z.json",
-   "summary": "STEP výrobní model; čistící kus DN110, obálka 127,4 × 150,3 × 238,5 mm, tři ústí.",
+   "summary": "STEP v\u00fdrobn\u00ed model; \u010dist\u00edc\u00ed kus DN110, ob\u00e1lka 127,4 \u00d7 150,3 \u00d7 238,5 mm, t\u0159i \u00fast\u00ed.",
    "status": "measured",
-   "source": "STEP výrobní model"
+   "source": "STEP v\u00fdrobn\u00ed model"
   }
  }
 }

@@ -12,7 +12,16 @@ ROOT = Path(__file__).parent
 BEND_RADIUS_MM = {110: 60.0, 125: 69.0, 160: 88.0}
 BRANCH_MEASURED = {article.rstrip("z"): value for article, value in _MEASURED.items()}
 def load_table():
-    return json.loads((ROOT / "data/kg_ostendorf.json").read_text())
+    """Načtení katalogu; `pipes` se rozvine ze sdílených hodnot `sockets`."""
+    table = json.loads((ROOT / "data/kg_ostendorf.json").read_text())
+    table["pipes"] = {
+        dn: {"dmax_mm": sock["collar_diameter_mm"], "wall_mm": sock["wall_mm"],
+             "insertion_depth_t_mm": sock["insertion_depth_t_mm"],
+             "status": sock["status"], "source": sock["source"],
+             **{key: sock[key] for key in ("socket_zone_mm", "socket_zone_status")
+                if key in sock}}
+        for dn, sock in table["sockets"].items()}
+    return table
 def _socket(table, dn):
     return table["sockets"][str(int(dn))]
 def _definition(name, article, family, od, angle, length, z1, z2, ports,
@@ -23,6 +32,7 @@ def _definition(name, article, family, od, angle, length, z1, z2, ports,
         z1_mm=float(z1), z2_mm=float(z2),
         mesh_anchor_mm=(0, 0, 0), mesh_along=(0, 1, 0), mesh_side=(1, 0, 0),
         ports=ports, branch_od_mm=branch_od, z3_mm=z3, geometry_status=status,
+        dn_mm=float(od), branch_dn_mm=branch_od,
     )
 def kg_elbow_lathes(row, table=None):
     """Koleno KGB přímo z katalogových kót (žádné škálování receptem)."""
@@ -170,6 +180,14 @@ def kg_items():
             z1, 0, ports, status=status,
         ), body))
     return items
+def kg_pipe_specs():
+    """Katalogové trubky pro tažení: DN -> (OD, stěna, t hnízda, OD hrdla)."""
+    table = load_table()
+    return {int(dn): (float(dn), float(row["wall_mm"]),
+                      float(row["insertion_depth_t_mm"]), float(row["dmax_mm"]))
+            for dn, row in table["pipes"].items()}
+
+
 def generate_kg_library(output_path):
     return generate_catalogue_library(kg_items(), output_path, name="PVC-U KG")
 if __name__ == "__main__":

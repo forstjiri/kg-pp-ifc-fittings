@@ -43,3 +43,5 @@ class Fitting:
     z3_mm: float | None = None
     geometry_status: str | None = None
     legacy_article: str | None = None
+    dn_mm: float | None = None  # katalogový rozměr (ne skutečný OD)
+    branch_dn_mm: float | None = None

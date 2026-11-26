@@ -1,12 +1,13 @@
 """Katalogová data: metadata, počty, kóty a geometrická identita."""
 
-import json
 import math
-from pathlib import Path
 
-ROOT = Path(__file__).parents[1]
-KG = json.loads((ROOT / "data/kg_ostendorf.json").read_text())
-PP = json.loads((ROOT / "data/pipelife_master3plus.json").read_text())
+import kg_generator
+import pp_generator
+
+# Načtení přes generátory = rozvinutí sdílených hodnot na původní kóty.
+KG = kg_generator.load_table()
+PP = pp_generator.TABLE
 
 
 def test_kg_catalogue_dimensions():

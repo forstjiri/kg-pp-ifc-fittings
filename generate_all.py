@@ -41,6 +41,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--standard", choices=("kg", "pp", "all"), default="all")
     parser.add_argument("--preview", action="store_true")
+    parser.add_argument("--grid", action="store_true")
     args = parser.parse_args()
     output = ROOT / "out"
     written = []
@@ -50,9 +51,18 @@ def main():
     if args.standard in ("pp", "all"):
         from pp_generator import generate_pp_library
         written.append(generate_pp_library(output / "tvarovky-EN1451-1.ifc"))
+    selected = ("kg", "pp") if args.standard == "all" else (args.standard,)
     if args.preview:
-        for standard in ("kg", "pp") if args.standard == "all" else (args.standard,):
+        for standard in selected:
             written.append(build_preview(standard))
+    if args.grid:
+        from grid import build_grid, validate_grid
+        for standard in selected:
+            path, info = build_grid(standard, output / f"grid-{standard}.ifc")
+            counts = validate_grid(path, info)
+            print(f"Grid OK: {standard}, {counts[0]} tvarovek, {counts[1]} trubek, "
+                  f"{counts[2]} typů, 0 EXPRESS chyb")
+            written.append(path)
     print("Hotovo:\n  " + "\n  ".join(str(path) for path in written))
 
 

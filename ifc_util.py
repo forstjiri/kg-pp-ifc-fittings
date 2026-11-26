@@ -36,11 +36,13 @@ def new_file(name):
         "root.create_entity", file, ifc_class="IfcProject", name=name
     )
     ifcopenshell.api.run("unit.assign_unit", file)
+    model = ifcopenshell.api.run("context.add_context", file, context_type="Model")
     context = ifcopenshell.api.run(
-        "context.add_context", file, context_type="Model", target_view="MODEL_VIEW"
+        "context.add_context", file, context_type="Model", context_identifier="Body",
+        target_view="MODEL_VIEW", parent=model,
     )
-    context.Precision = 1e-5
-    project.RepresentationContexts = [context]
+    model.Precision = 1e-5
+    project.RepresentationContexts = [model]
     return file, project, context
 
 

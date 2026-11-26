@@ -9,18 +9,44 @@ from swept_geometrie import (
     branch_lathes, cap_lathes, cleanout_lathes, elbow_lathes, reducer_lathes,
 )
 ROOT = Path(__file__).parent
-TABLE = json.loads((ROOT / "data/pipelife_master3plus.json").read_text())
 OD = {32: 33.0, 40: 41.1, 50: 51.0, 75: 76.1, 90: 91.2,
       110: 111.3, 125: 126.3, 160: 161.5}
 WALL = {32: 1.8, 40: 1.8, 50: 2.0, 75: 2.1, 90: 2.5,
         110: 3.0, 125: 3.5, 160: 4.4}
+DN_BY_SIZE = {32: 30, 40: 40, 50: 50, 75: 70, 90: 90,
+              110: 100, 125: 125, 160: 150}
 LIBRARY_SIZES = {32, 40, 50, 75, 110, 125, 160}
-SOCKET_T = {int(k): v for k, v in TABLE["dimension_status"]["socket"]["insertion_depth_t_mm"].items()}
-SOCKET_OD = {int(k): v for k, v in TABLE["dimension_status"]["socket"]["collar_outer_diameter_mm"].items()}
+_RAW = json.loads((ROOT / "data/pipelife_master3plus.json").read_text())
+SOCKET_T = {int(k): v for k, v in _RAW["dimension_status"]["socket"]["insertion_depth_t_mm"].items()}
+SOCKET_OD = {int(k): v for k, v in _RAW["dimension_status"]["socket"]["collar_outer_diameter_mm"].items()}
+
+
+def _expand(table):
+    """VRACÍ původní podobu řádků: hodnoty sdílené na rozměr se jen rozvinou."""
+    for row in table["elbows"] + table["cleanouts"]:
+        dn = row["dn_od"]
+        row.update(DN=DN_BY_SIZE[dn], od_mm=OD[dn], socket_od_mm=SOCKET_OD[dn])
+    for row in table["reducers"]:
+        row.update(DN=DN_BY_SIZE[row["large_dn_od"]],
+                   large_socket_od_mm=SOCKET_OD[row["large_dn_od"]],
+                   small_socket_od_mm=SOCKET_OD[row["small_dn_od"]])
+    for row in table["simple_branches"]:
+        row["DN"] = DN_BY_SIZE[row["dn_od"]]
+        # D/D1/D2/Dmax se ve zdroji vyskytovaly právě u řádků 87,5°.
+        if row["angle_deg"] == 87.5:
+            row.update(D_mm=OD[row["dn_od"]], D1_mm=OD[row["branch_dn_od"]],
+                       D2_mm=SOCKET_OD[row["branch_dn_od"]],
+                       Dmax_mm=SOCKET_OD[row["dn_od"]])
+    for row in table["caps"]:
+        row["DN"] = DN_BY_SIZE[row["dn_od"]]
+    return table
+
+
+TABLE = _expand(_RAW)
 def _bend_radii():
     """R z katalogového z1 = R·tan(α/2) + c (LSQ přes úhly na DN)."""
     result = {}
-    for dn in LIBRARY_SIZES:
+    for dn in OD:
         rows = [r for r in TABLE["elbows"] if r["dn_od"] == dn]
         design = np.array([[math.tan(math.radians(r["angle_deg"]) / 2), 1.0]
                            for r in rows])
@@ -53,14 +79,17 @@ def _definition(row, family, main_dn, branch_dn=None, ports=(), status=""):
         mesh_anchor_mm=(0, 0, 0), mesh_along=(0, 1, 0), mesh_side=(1, 0, 0),
         ports=ports, branch_od_mm=OD[branch_dn] if branch_dn else None,
         z3_mm=row.get("z3_mm"), geometry_status=status,
+        dn_mm=float(main_dn), branch_dn_mm=float(branch_dn) if branch_dn else None,
         legacy_article=_legacy_article(
             row, {"CAP": "cap", "USERDEFINED": "cleanout"}.get(family, family.lower())),
     )
-def pp_items():
+def pp_items(sizes=None):
+    """Volitelně omezit rozsah DN; výchozí knihovna vynechává 90."""
+    sizes = LIBRARY_SIZES if sizes is None else set(sizes)
     items = []
     for row in TABLE["elbows"]:
         dn = row["dn_od"]
-        if dn not in LIBRARY_SIZES:
+        if dn not in sizes:
             continue
         angle = math.radians(row["angle_deg"])
         d1 = np.array((math.sin(angle), math.cos(angle), 0.0))
@@ -84,7 +113,7 @@ def pp_items():
                              "poloměr ohybu LSQ ze z1"), body))
     for row in TABLE["simple_branches"]:
         main, small = row["dn_od"], row["branch_dn_od"]
-        if main not in LIBRARY_SIZES or small not in LIBRARY_SIZES:
+        if main not in sizes or small not in sizes:
             continue
         angle = math.radians(row["angle_deg"])
         length = row["length_mm"]
@@ -113,7 +142,7 @@ def pp_items():
         items.append((_definition(row, "JUNCTION", main, small, ports, status), body))
     for row in TABLE["reducers"]:
         large, small = row["large_dn_od"], row["small_dn_od"]
-        if large not in LIBRARY_SIZES or small not in LIBRARY_SIZES:
+        if large not in sizes or small not in sizes:
             continue
         t, tb = SOCKET_T[large], SOCKET_T[small]
         ports = (
@@ -135,7 +164,7 @@ def pp_items():
         ), body))
     for row in TABLE["cleanouts"]:
         dn = row["dn_od"]
-        if dn not in LIBRARY_SIZES:
+        if dn not in sizes:
             continue
         t = SOCKET_T[dn]
         ports = (
@@ -154,7 +183,7 @@ def pp_items():
         ), body))
     for row in TABLE["caps"]:
         dn = row["dn_od"]
-        if dn not in LIBRARY_SIZES:
+        if dn not in sizes:
             continue
         t = SOCKET_T[dn]
         ports = (Port("SOCKET", (0, 0, 0), (0, -1, 0), "SINK", SOCKET_OD[dn],
@@ -166,6 +195,12 @@ def pp_items():
             status="SweptSolid zátka: katalogová délka L, hnízdový profil approximated",
         ), body))
     return items
+def pp_pipe_specs():
+    """Katalogové trubky pro tažení: DN -> (OD, stěna, t hnízda, OD hrdla)."""
+    return {dn: (OD[dn], WALL[dn], SOCKET_T[dn], SOCKET_OD[dn])
+            for dn in sorted(OD)}
+
+
 def generate_pp_library(output_path):
     return generate_catalogue_library(pp_items(), output_path, name="PP MASTER 3 PLUS")
 if __name__ == "__main__":
