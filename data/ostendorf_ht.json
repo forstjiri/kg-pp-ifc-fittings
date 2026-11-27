@@ -1,0 +1,44 @@
+{
+  "material": "PP-H",
+  "standard": "EN 1451-1",
+  "source_series": "HT-System PP",
+  "current_source": {
+    "title": "HT-System (PP) catalogue",
+    "url": "https://www.plastikabalumag.ch/wp-content/uploads/2024/03/LP_HT_System_DE_2016_09_30.pdf",
+    "edition": "2016-09-30, HTEA 87 degree table p. 7"
+  },
+  "drawing_source": {
+    "url": "https://www.ostendorf-kunststoffe.com/wp-content/ok-plugins-data/ok-product-data/Zeichnungen/PDF/113410z.pdf",
+    "note": "Drawings give socket outer diameters 89.2 and 63.6 mm (+2/0); pipe wall and socket depth come from the catalogue table."
+  },
+  "dimension_status": {
+    "catalogue_values": "L, z1, z2, z3 and angle from the HT catalogue; OD and socket OD from the dimensioned drawing",
+    "approximation": "Parametric socket wall and seal groove are approximations, as for the Pipelife series."
+  },
+  "simple_branches": [
+    {
+      "angle_deg": 87,
+      "dn_od": 75,
+      "branch_dn_od": 50,
+      "DN": 70,
+      "od_mm": 75.0,
+      "branch_od_mm": 50.0,
+      "socket_od_mm": 89.2,
+      "branch_socket_od_mm": 63.6,
+      "wall_mm": 1.9,
+      "branch_wall_mm": 1.8,
+      "insertion_t_mm": 61,
+      "branch_insertion_t_mm": 56,
+      "article": "113410",
+      "length_mm": 112,
+      "z1_mm": 27,
+      "z2_mm": 43,
+      "z3_mm": 31,
+      "status": "catalogue",
+      "source": "HT catalogue 2016-09, p. 7; drawing 113410z",
+      "series": "ostendorf-ht",
+      "display_name": "HT odbočka 87° OD75/50",
+      "geometry_status": "SweptSolid: HT katalog L, z1, z2, z3; OD a hrdla z výkresu 113410z; hnízdový profil approximated"
+    }
+  ]
+}

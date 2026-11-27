@@ -156,9 +156,13 @@ def reducer_lathes(
 def branch_lathes(
     length_main_mm, od_main, wall_main, socket_od_main, cup_len_main,
     od_branch, wall_branch, socket_od_branch, cup_len_branch,
-    vertex_y_mm, z3_mm, angle_deg,
+    vertex_y_mm, z3_mm, angle_deg, cup_outward=False,
 ):
-    """Odbočka jako překrývající se lathe: hnízdovaný hlavní běh + šikmá větev."""
+    """Odbočka jako překrývající se lathe: hnízdovaný hlavní běh + šikmá větev.
+
+    `cup_outward` = hrdlo větve vede ven od těla (PP katalogy); výchozí chování
+    ponechává ústí na konci trubky pro KG, kde délka větve pochází ze STEP.
+    """
     angle = np.deg2rad(float(angle_deg))
     main, mouths = socket_run_lathes(
         length_main_mm, od_main, wall_main, socket_od_main, cup_len_main,
@@ -169,9 +173,10 @@ def branch_lathes(
                         start=junction, direction=direction)
     cup = socket_cup_profile(od_branch, wall_branch, socket_od_branch,
                              cup_len_branch, cup_len_branch * 0.956)
-    branch_cup = straight_lathe(cup, junction + float(z3_mm) * direction, -direction)
+    mouth = junction + (float(z3_mm) + (float(cup_len_branch) if cup_outward else 0.0)) * direction
+    branch_cup = straight_lathe(cup, mouth, -direction)
     return (SweptBody(main.lathes + (branch, branch_cup)),
-            mouths + ((junction + float(z3_mm) * direction, direction),))
+            mouths + ((mouth, direction),))
 def cleanout_lathes(
     length_mm, od_mm, wall_mm, socket_od_mm, cup_len_mm,
     z1_mm, cover_diameter_mm, cover_reach_mm,

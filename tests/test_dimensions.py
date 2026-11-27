@@ -34,9 +34,11 @@ def test_pp_rows_have_catalogue_metadata_and_nominal_dn():
     for family in ("elbows", "simple_branches", "reducers", "cleanouts", "caps"):
         for row in PP[family]:
             assert row["status"] == "catalogue"
-            assert row["source"].startswith(("handbook 2026, str. ", "brochure str. "))
-            assert row["series"] == "current" and "DN" in row
-    assert all("branch_DN" in row for row in PP["simple_branches"])
+            assert row["source"].startswith(("handbook 2026, str. ", "brochure str. ",
+                                             "HT catalogue "))
+            assert row["series"] in ("current", "ostendorf-ht") and "DN" in row
+    assert all("branch_DN" in row for row in PP["simple_branches"]
+               if row["series"] == "current")
 
 
 def test_pp_handbook_elbows_and_l1_geometry():

@@ -43,6 +43,9 @@ def _expand(table):
 
 
 TABLE = _expand(_RAW)
+# Další výrobní série (Ostendorf HT) má vlastní OD/stěny/hrdla; řádky nesou překrytí.
+_HT = json.loads((ROOT / "data/ostendorf_ht.json").read_text())
+TABLE["simple_branches"].extend(_HT["simple_branches"])
 def _bend_radii():
     """R z katalogového z1 = R·tan(α/2) + c (LSQ přes úhly na DN)."""
     result = {}
@@ -69,15 +72,17 @@ def _legacy_article(row, family):
                ("family", "dn_od", "branch_dn_od", "angle_deg")):
             return key
     return None
-def _definition(row, family, main_dn, branch_dn=None, ports=(), status=""):
+def _definition(row, family, main_dn, branch_dn=None, ports=(), status="",
+                name=None, od=None, branch_od=None):
     return Fitting(
-        name=TITLES[family](row, main_dn, branch_dn), standard="EN 1451-1",
+        name=name or TITLES[family](row, main_dn, branch_dn), standard="EN 1451-1",
         article=row["article"], family="USERDEFINED" if family == "CAP" else family,
-        od_mm=OD[main_dn], angle_deg=row.get("angle_deg", 0),
+        od_mm=float(od) if od is not None else OD[main_dn], angle_deg=row.get("angle_deg", 0),
         length_mm=row["length_mm"], z1_mm=row.get("z1_mm", 0),
         z2_mm=row.get("z2_mm", 0),
         mesh_anchor_mm=(0, 0, 0), mesh_along=(0, 1, 0), mesh_side=(1, 0, 0),
-        ports=ports, branch_od_mm=OD[branch_dn] if branch_dn else None,
+        ports=ports, branch_od_mm=(float(branch_od) if branch_od is not None
+                                   else OD[branch_dn] if branch_dn else None),
         z3_mm=row.get("z3_mm"), geometry_status=status,
         dn_mm=float(main_dn), branch_dn_mm=float(branch_dn) if branch_dn else None,
         legacy_article=_legacy_article(
@@ -117,29 +122,37 @@ def pp_items(sizes=None):
             continue
         angle = math.radians(row["angle_deg"])
         length = row["length_mm"]
-        t, tb = SOCKET_T[main], SOCKET_T[small]
+        od_main = float(row.get("od_mm", OD[main]))
+        od_small = float(row.get("branch_od_mm", OD[small]))
+        sock_main = float(row.get("socket_od_mm", SOCKET_OD[main]))
+        sock_small = float(row.get("branch_socket_od_mm", SOCKET_OD[small]))
+        t = float(row.get("insertion_t_mm", SOCKET_T[main]))
+        tb = float(row.get("branch_insertion_t_mm", SOCKET_T[small]))
         from_socket, from_spigot = length / 2 - row["z2_mm"], -length / 2 + row["z1_mm"] + t
         estimated = abs(from_socket - from_spigot) > 8.0
         vertex_y = (from_socket + from_spigot) / 2
         direction = np.array((math.sin(angle), math.cos(angle), 0.0))
+        body, mouths = branch_lathes(
+            length, od_main, float(row.get("wall_mm", WALL[main])), sock_main, t,
+            od_small, float(row.get("branch_wall_mm", WALL[small])), sock_small, tb,
+            vertex_y, row["z3_mm"], row["angle_deg"], cup_outward=True,
+        )
+        branch_mouth, branch_axis = mouths[-1]
         ports = (
-            Port("SPIGOT", (0, -length / 2 + t, 0), (0, -1, 0), "SOURCE", OD[main],
+            Port("SPIGOT", (0, -length / 2 + t, 0), (0, -1, 0), "SOURCE", od_main,
                  end_type="SPIGOT", insertion_mm=t),
-            Port("SOCKET", (0, length / 2, 0), (0, 1, 0), "SINK", SOCKET_OD[main],
+            Port("SOCKET", (0, length / 2, 0), (0, 1, 0), "SINK", sock_main,
                  end_type="SOCKET", insertion_mm=t),
-            Port("SOCKET BRANCH", (0, vertex_y, 0) + row["z3_mm"] * direction,
-                 tuple(direction), "SINK", SOCKET_OD[small],
-                 end_type="SOCKET", insertion_mm=tb),
+            Port("SOCKET BRANCH", tuple(branch_mouth), tuple(branch_axis),
+                 "SINK", sock_small, end_type="SOCKET", insertion_mm=tb),
         )
-        body, _ = branch_lathes(
-            length, OD[main], WALL[main], SOCKET_OD[main], t,
-            OD[small], WALL[small], SOCKET_OD[small], tb,
-            vertex_y, row["z3_mm"], row["angle_deg"],
-        )
-        status = ("estimated: vrchol z průměru z1/t a z2, řádky nesouhlasí o více než 8 mm"
-                  if estimated else
-                  "SweptSolid: L, z2, z3 a úhel z příručky; průnik těl bez booleanu")
-        items.append((_definition(row, "JUNCTION", main, small, ports, status), body))
+        status = row.get("geometry_status") or (
+            "estimated: vrchol z průměru z1/t a z2, řádky nesouhlasí o více než 8 mm"
+            if estimated else
+            "SweptSolid: L, z2, z3 a úhel z příručky; průnik těl bez booleanu")
+        items.append((_definition(row, "JUNCTION", main, small, ports, status,
+                                  name=row.get("display_name"), od=od_main,
+                                  branch_od=od_small), body))
     for row in TABLE["reducers"]:
         large, small = row["large_dn_od"], row["small_dn_od"]
         if large not in sizes or small not in sizes:

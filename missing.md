@@ -16,6 +16,14 @@ following values for each diameter:
   reducers, cleanouts and caps;
 - article designations and the status/source/series of each dimension.
 
+## Ostendorf HT-System PP (EN 1451-1)
+
+Only HTEA branch 113410 (DN75/50, 87°) is included so far, from `data/ostendorf_ht.json`.
+The remaining HT/HTsafe parts (other sizes, bends, reducers, caps, cleanouts) are not modelled.
+HT pipe dimensions differ from Pipelife Master 3 Plus (DN75: OD 75 mm, wall 1.9 mm, socket OD 89.2 mm,
+insertion depth 61 mm; DN50: OD 50 mm, wall 1.8 mm, socket OD 63.6 mm, insertion depth 56 mm),
+so mixing the two series in one connection without checking the actual part is not safe.
+
 ## Other open items
 
 - The KG DN125 socket has no STEP reference; its profile is derived from measurements on DN110 and DN160.

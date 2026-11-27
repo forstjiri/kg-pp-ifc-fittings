@@ -2,6 +2,7 @@
 
 - `kg_ostendorf.json` — Ostendorf KG (EN 1401-1), catalogue dimensions plus `sockets` (`t`, Dmax, wall).
 - `pipelife_master3plus.json` — Pipelife Master 3 Plus (EN 1451-1), 2026 handbook; older articles 3496… only in `legacy_article_examples`.
+- `ostendorf_ht.json` — Ostendorf HT-System PP (EN 1451-1); currently only branch 113410 (DN75/50, 87°). Rows carry explicit OD, socket OD, wall and insertion depth because this series uses different values than Master 3 Plus.
 
 Sources: [Master 3 Plus brochure](https://www.pipelife.cz/content/dam/pipelife/czech-republic/ke-stazen%C3%AD/english/PIPELIFE_MASTER_3_PLUS_BROCHURE_EN_ATI.pdf), [technical handbook](https://www.pipelife.at/content/dam/pipelife/austria/marketing/building/soil-waste/documents/Technisches%20Handbuch%20MASTER%203%20PLUS.pdf).
 

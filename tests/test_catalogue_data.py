@@ -52,6 +52,17 @@ def test_pp_shared_values_expand_exactly():
     assert all(row["DN"] == pp.DN_BY_SIZE[row["dn_od"]] for row in expanded["caps"])
 
 
+def test_ostendorf_ht_branch_is_included_as_own_series():
+    raw = json.loads((ROOT / "data/ostendorf_ht.json").read_text())
+    row = raw["simple_branches"][0]
+    definition = next(d for d, _ in pp.pp_items(sizes={50, 75}) if d.article == "113410")
+    assert definition.name == "HT odbočka 87° OD75/50"
+    assert (definition.od_mm, definition.branch_od_mm) == (75.0, 50.0)
+    assert definition.length_mm == row["length_mm"]
+    assert definition.angle_deg == row["angle_deg"]
+    assert {p.od_mm for p in definition.ports} == {75.0, 89.2, 63.6}
+
+
 def test_pp_dn90_socket_diameter_is_documented():
     assert pp.SOCKET_OD[90] == 105.4
     raw = json.loads((ROOT / "data/pipelife_master3plus.json").read_text())

@@ -36,10 +36,11 @@ def test_kg_grid_covers_all_catalogue_fittings_and_three_pipe_sizes(kg_grid):
 
 def test_pp_grid_includes_dn90_and_ends_at_dn110(pp_grid):
     _, info, (fittings, pipes, total) = pp_grid
-    assert (fittings, pipes, total) == (84, 6, 90)
+    assert (fittings, pipes, total) == (85, 6, 91)  # vč. Ostendorf HT 113410
     assert info["sizes"] == (32, 40, 50, 75, 90, 110)
     articles = {row[2] for row in info["layout"]}
     assert any("B90" in article for article in articles)  # M3-B90/…
+    assert "113410" in articles  # HT odbočka 75/50 87°
     assert not any("B150" in article for article in articles)
 
 
@@ -86,6 +87,26 @@ def test_pipe_segments_have_hollow_profiles_and_end_ports(pp_grid):
         assert solid.is_a("IfcExtrudedAreaSolid")
         assert solid.Depth == pytest.approx(PIPE_LENGTH_MM / 1000)
     assert len(file.by_type("IfcPipeSegment")) == len(SIZES["pp"])
+
+
+def test_pp_branch_socket_protrudes_and_port_sits_at_its_mouth(pp_grid):
+    """Regrese: hrdlo odbočky nesmí být obrácené dovnitř hlavního těla."""
+    import ifcopenshell.geom
+
+    path, info, _ = pp_grid
+    file = ifcopenshell.open(str(path))
+    settings = ifcopenshell.geom.settings()
+    for article in ("M3-EA70/50/87", "113410"):  # Pipelife i Ostendorf HT
+        occurrence = file.by_id(next(row[6] for row in info["layout"]
+                                     if row[2] == article).id())
+        vertices = np.asarray(ifcopenshell.geom.create_shape(
+            settings, occurrence).geometry.verts).reshape(-1, 3)
+        assert (vertices[:, 0].max() - vertices[:, 0].min()) * 1000 > 120, article
+        port = next(p for p in _ports(occurrence) if p.Name == "SOCKET BRANCH")
+        local = (ifcopenshell.util.placement.get_local_placement(port.ObjectPlacement)[:3, 3]
+                 - ifcopenshell.util.placement.get_local_placement(
+                     occurrence.ObjectPlacement)[:3, 3])
+        assert local[0] * 1000 > 60, article
 
 
 def test_grid_cells_do_not_overlap(kg_grid, pp_grid):

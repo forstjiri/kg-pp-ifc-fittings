@@ -36,9 +36,27 @@ IoU tests compare SweptSolid bodies with manufacturer STEP meshes from orthogona
 ## Open items
 
 - Collars, vent branch/UV cap, siphon adapters, acoustic collar, 87.5° cleanout in the flow axis, 45° cleanout
-- Straight pipes (barak generator), EN 1329-1 (32–75), older PP series 2021
+- Straight pipes (barak generator), EN 1329-1 (32–75), older PP series 2021; Ostendorf HT only branch 113410 is included (see `missing.md`)
 - Socket groove sealing ring only approximated; KG DN125 socket without STEP measurement
 - DN160 pull-out in the barak pilot (81−10) vs catalogue `t` = 84 — verify when connecting
 - Standard `Pset_FittingBend`/`Junction`/`Transition` — verify in the target IFC4
 
 History: a spike compared A (BRep), B (booleans) and C (tessellation); fittings are now modelled as exact revolutions from catalogue dimensions, and the STEP/mesh data in `data/ostendorf/` is only a reference. The Master 3 Plus catalogue (2026) is in `data/pipelife_master3plus.json`, with older articles 3496… stored as `LegacyArticle`.
+
+## KG type codes (DE vs CZ)
+
+German and Czech catalogues use the same Ostendorf type codes; only the descriptive names differ. The `Article` stored in `Pset_Tvarovka.CatalogArticle` is the manufacturer article number (e.g. `220300`), identical in both languages. Resellers use their own codes — DEK KGEA 110/110 45° is `4410050076` (catalogue code `44F22`) — which are not article numbers.
+
+| Code  | German (Ostendorf catalogue) | Czech                | This library                                |
+|-------|------------------------------|----------------------|---------------------------------------------|
+| KGB   | Bogen                        | koleno               | `IfcPipeFittingType/BEND`                   |
+| KGEA  | Abzweig                      | odbočka              | `IfcPipeFittingType/JUNCTION`               |
+| KGR   | Reduktion                    | redukce              | `IfcPipeFittingType/TRANSITION`             |
+| KGM   | Muffenstopfen                | hrdlová zátka        | `IfcPipeFittingType/USERDEFINED` (cap)      |
+| KGK   | Kappe                        | víčko                | `IfcPipeFittingType/USERDEFINED` (cap)      |
+| KGRE  | Reinigungsrohr               | čisticí kus          | `IfcPipeFittingType/USERDEFINED` (cleanout) |
+| KGUG  | Anschluss an Guss            | přechodka litina/PVC | not included                                |
+
+Caps and cleanouts share `USERDEFINED` as the IFC `PredefinedType`; the distinction is kept in `Name` and `CatalogArticle`. The library covers DN110/125/160; larger sizes are listed in `missing.md`.
+
+Sources: [Ostendorf KG catalogue (DE, 07/2019)](https://ostendorf-osma.de/uploads/page/translation/de/catalog_pdf/90/DE_KG_KATALOG_OSMA_7_2019.pdf), [Ostendorf price list 2026](https://www.emax-haustechnik.de/shop/images/products/media/hersteller/kgrohr-katalog.pdf).
